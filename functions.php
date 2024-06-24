@@ -47,6 +47,7 @@ new AudioDisplay();
 new FormNavigation();
 
 // Adicionar shortcode para o formulário e exibição de áudio
+add_shortcode('form_1_shortcode', 'form_1_shortcode');
 function form_1_shortcode() {
     ob_start();
     ?>
@@ -122,18 +123,29 @@ function form_1_shortcode() {
         });
     </script>
 
-    <form method="post">
-        <label for="name">Nome Completo:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="birthdate">Data de Nascimento (dd/mm/yyyy):</label>
-        <input type="text" id="birthdate" name="birthdate" required>
-        <br>
-        <input type="submit" name="numerology_submit_1" value="Calcular">
-    </form>
     <?php
+    // Adicione o formulário do Elementor com o ID desejado
+    $elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
+    echo \Elementor\Plugin::instance()->frontend->get_builder_content($elementor_form_id, true);
+
+    if (isset($_SESSION['name_number']) && isset($_SESSION['birth_number'])) {
+        echo '<h2>Resultados:</h2>';
+        echo '<p>Número do Nome: ' . $_SESSION['name_number'] . '</p>';
+        echo '<p>Número do Destino: ' . $_SESSION['birth_number'] . '</p>';
+
+        // Adicionar o áudio baseado nos resultados
+        $audio_file = get_stylesheet_directory_uri() . '/audio/result_audio_' . $_SESSION['name_number'] . '.mp3';
+        echo '<audio controls autoplay>
+                <source src="' . esc_url($audio_file) . '" type="audio/mpeg">
+                Seu navegador não suporta o elemento de áudio.
+              </audio>';
+
+        // Limpar os dados da sessão
+        unset($_SESSION['name_number']);
+        unset($_SESSION['birth_number']);
+    }
     return ob_get_clean();
 }
-add_shortcode('form_1_shortcode', 'form_1_shortcode');
+
 
 
