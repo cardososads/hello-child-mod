@@ -75,17 +75,6 @@ function form_1_shortcode() {
             const textDiv = document.getElementById('text');
             let timeoutIDs = [];
 
-            const playAudio = () => {
-                setTimeout(() => {
-                    audio.play().catch(error => {
-                        console.log('Autoplay foi bloqueado. Tentando novamente.');
-                        setTimeout(playAudio, 1000);
-                    });
-                }, 1000);
-            };
-
-            playAudio();
-
             audio.addEventListener('play', () => {
                 timeoutIDs.forEach(id => clearTimeout(id));  // Clear previous timeouts
                 timeoutIDs = [];
