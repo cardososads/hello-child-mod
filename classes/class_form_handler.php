@@ -34,5 +34,3 @@ class FormHandler {
         }
     }
 }
-
-new FormHandler();

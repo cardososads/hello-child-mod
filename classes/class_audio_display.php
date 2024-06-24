@@ -13,7 +13,7 @@ class AudioDisplay {
             $audio_file = $_SESSION['selected_audio'];
             $caption_file = $_SESSION['selected_caption'];
 
-            echo '<audio controls>
+            echo '<audio controls autoplay>
                     <source src="' . esc_url($audio_file) . '" type="audio/mpeg">
                     <track src="' . esc_url($caption_file) . '" kind="captions" srclang="pt" label="Portuguese">
                     Seu navegador não suporta o elemento de áudio.
@@ -26,5 +26,3 @@ class AudioDisplay {
         }
     }
 }
-
-new AudioDisplay();
