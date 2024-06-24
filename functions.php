@@ -53,7 +53,7 @@ function form_1_shortcode() {
     ?>
     <div id="text"></div>
     <audio id="meuAudio" controls autoplay style="width: 100%">
-        <source src="<?php echo esc_url(get_stylesheet_directory_uri() . '/audio/intro/introducao.mp3'); ?>" type="audio/mpeg">
+        <source src="<?php echo esc_url(get_stylesheet_directory_uri() . '/audio/intro/introducao.ogg'); ?>" type="audio/mpeg">
         <track id="legendasTrack" src="<?php echo esc_url(get_stylesheet_directory_uri() . '/audio/intro/introducao.vtt'); ?>" kind="subtitles" srclang="pt" label="Portuguese" default>
         Seu navegador não suporta o elemento de áudio ou legendas. Por favor, ative as legendas manualmente se estiverem disponíveis.
     </audio>
