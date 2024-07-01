@@ -195,7 +195,7 @@ add_action('elementor_pro/forms/new_record', function($record, $handler) {
     foreach ($raw_fields as $id => $field) {
         $fields[$id] = $field['value'];
     }
-
+    var_dump($fields);
     // Armazene os dados do formulário em uma opção temporária
     set_transient('form1_submission_data', $fields, 60*60); // Armazena por 1 hora
 }, 10, 2);
