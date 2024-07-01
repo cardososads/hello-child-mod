@@ -31,7 +31,7 @@ class FormNavigation {
             error_log('Form-01 processado com sucesso.');
 
             // Redirecionar diretamente para o Form-02 após calcular
-            wp_redirect(home_url('localhost/form-02/'));
+            wp_redirect(home_url('/form-02/'));
             exit;
         }
     }
