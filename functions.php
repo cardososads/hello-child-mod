@@ -206,22 +206,37 @@ function form_1_shortcode() {
     return ob_get_clean();
 }
 
-function display_user_data() {
-    if (!session_id()) {
-        session_start();
+add_action('elementor_pro/forms/new_record', function($record, $handler) {
+    // Verifique se o formulário é 'Form1'
+    $form_name = $record->get_form_settings('form_name');
+    if ('Form1' !== $form_name) {
+        return;
     }
 
-    $first_name = isset($_SESSION['first_name']) ? $_SESSION['first_name'] : 'Nome não fornecido';
-    $birth_date = isset($_SESSION['birth_date']) ? $_SESSION['birth_date'] : 'Data de nascimento não fornecida';
+    // Obtenha os dados do formulário
+    $raw_fields = $record->get('fields');
+    $fields = [];
+    foreach ($raw_fields as $id => $field) {
+        $fields[$id] = $field['value'];
+    }
 
-    ob_start();
-    ?>
-    <div>
-        <h2>Dados do Usuário</h2>
-        <p>Primeiro Nome: <?php echo esc_html($first_name); ?></p>
-        <p>Data de Nascimento: <?php echo esc_html($birth_date); ?></p>
-    </div>
-    <?php
-    return ob_get_clean();
+    // Armazene os dados do formulário em uma opção temporária
+    set_transient('form1_submission_data', $fields, 60*60); // Armazena por 1 hora
+}, 10, 2);
+
+function mostrar_form1_submission_data() {
+    // Obtenha os dados armazenados
+    $fields = get_transient('form1_submission_data');
+
+    if ($fields) {
+        // Mostre os dados usando var_dump
+        ob_start();
+        echo '<pre>';
+        var_dump($fields);
+        echo '</pre>';
+        return ob_get_clean();
+    } else {
+        return 'Nenhuma submissão recente de formulário encontrada.';
+    }
 }
-add_shortcode('display_user_data', 'display_user_data');
+add_shortcode('mostrar_form1_dados', 'mostrar_form1_submission_data');
