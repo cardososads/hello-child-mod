@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 // Redireciona para a próxima página
-                window.location.href = 'URL_DA_PROXIMA_PAGINA'; // Substitua pela URL real da próxima página
+                window.location.href = '/form-02'; // Substitua pela URL real da próxima página
             }
         });
     });

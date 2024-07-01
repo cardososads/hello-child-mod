@@ -205,3 +205,23 @@ function form_1_shortcode() {
     }
     return ob_get_clean();
 }
+
+function display_user_data() {
+    if (!session_id()) {
+        session_start();
+    }
+
+    $first_name = isset($_SESSION['first_name']) ? $_SESSION['first_name'] : 'Nome não fornecido';
+    $birth_date = isset($_SESSION['birth_date']) ? $_SESSION['birth_date'] : 'Data de nascimento não fornecida';
+
+    ob_start();
+    ?>
+    <div>
+        <h2>Dados do Usuário</h2>
+        <p>Primeiro Nome: <?php echo esc_html($first_name); ?></p>
+        <p>Data de Nascimento: <?php echo esc_html($birth_date); ?></p>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('display_user_data', 'display_user_data');
