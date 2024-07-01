@@ -50,26 +50,24 @@ new FormNavigation();
 add_shortcode('form_1_shortcode', 'form_1_shortcode');
 function form_1_shortcode() {
     ob_start();
+    $audio_intro = get_option('_audios');
+//    echo '<pre>';
+//        var_dump($audio_intro['_legenda-intro']);
+//    echo '</pre>';
     ?>
     <div id="text"></div>
     <audio id="meuAudio" controls autoplay style="width: 100%">
-        <source src="<?php echo esc_url(get_stylesheet_directory_uri() . '/audio/intro/introducao.ogg'); ?>" type="audio/mpeg">
+        <source src="<?php echo esc_url($audio_intro['_audio-introdutorio']); ?>" type="audio/mpeg">
         <track id="legendasTrack" src="<?php echo esc_url(get_stylesheet_directory_uri() . '/audio/intro/introducao.vtt'); ?>" kind="subtitles" srclang="pt" label="Portuguese" default>
         Seu navegador não suporta o elemento de áudio ou legendas. Por favor, ative as legendas manualmente se estiverem disponíveis.
     </audio>
-
+    <?php
+    ?>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const subtitles = [
-                { time: 0, text: "Olá, tudo bem?" },
-                { time: 2.5, text: "Nesse momento vamos iniciar nossa jornada de conhecimento," },
-                { time: 5.8, text: "entendendo como seu nome, data de nascimento e assinatura" },
-                { time: 9.5, text: "revelam muitos aspectos sobre sua vida." },
-                { time: 12.7, text: "Com a numerologia cabalística saberemos sobre oportunidades," },
-                { time: 16, text: "relacionamento, desafios, e outros fatos que podem te ajudar" },
-                { time: 20.5, text: "a ter autoconhecimento e uma visão única e profunda" },
-                { time: 23, text: "sobre diversos aspectos da sua existência." }
-            ];
+            <?php
+                echo stripslashes($audio_intro['_legenda-intro']);
+            ?>
 
             const audio = document.getElementById('meuAudio');
             const textDiv = document.getElementById('text');
