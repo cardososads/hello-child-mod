@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Seleciona o formulário
-    const form = document.querySelector('.elementor-form');
+    const form = document.querySelector('#Form1');
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
