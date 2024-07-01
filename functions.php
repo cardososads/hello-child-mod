@@ -189,16 +189,27 @@ add_action('elementor_pro/forms/new_record', function($record, $handler) {
         return;
     }
 
-    // Obtenha os dados do formulário
+    // Defina os nomes esperados dos campos
+    $expected_fields = [
+        'nome' => 'name', // 'nome' é o campo do Elementor, 'name' é o nome que ele terá no array
+        'data_de_nascimento' => 'date', // 'data_de_nascimento' é o campo do Elementor, 'email' é o nome que ele terá no array
+    ];
+
+    // Obtenha os dados do formulário e renomeie conforme necessário
     $raw_fields = $record->get('fields');
     $fields = [];
-    foreach ($raw_fields as $id => $field) {
-        $fields[$id] = $field['value'];
+    foreach ($expected_fields as $key => $field_name) {
+        if (isset($raw_fields[$key])) {
+            $fields[$key] = $raw_fields[$key]['value'];
+        } else {
+            $fields[$key] = ''; // Define um valor padrão se o campo não estiver presente
+        }
     }
-    var_dump($fields);
+
     // Armazene os dados do formulário em uma opção temporária
     set_transient('form1_submission_data', $fields, 60*60); // Armazena por 1 hora
 }, 10, 2);
+
 
 function mostrar_form1_submission_data() {
     // Obtenha os dados armazenados
