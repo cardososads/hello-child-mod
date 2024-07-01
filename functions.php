@@ -52,30 +52,6 @@ new FormHandler();
 new AudioDisplay();
 new FormNavigation();
 
-// Manipulador AJAX para armazenar dados do usuário
-function store_user_data() {
-    if (!session_id()) {
-        session_start();
-    }
-
-    // Armazena os dados na sessão
-    $_SESSION['first_name'] = sanitize_text_field($_POST['first_name']);
-    $_SESSION['birth_date'] = sanitize_text_field($_POST['birth_date']);
-
-    wp_send_json_success();
-}
-add_action('wp_ajax_store_user_data', 'store_user_data');
-add_action('wp_ajax_nopriv_store_user_data', 'store_user_data');
-
-// Enfileirar script personalizado
-function enqueue_custom_script() {
-    wp_enqueue_script('custom-script', get_stylesheet_directory_uri() . '/js/custom-script.js', array('jquery'), null, true);
-
-    // Passa a URL do AJAX para o script
-    wp_localize_script('custom-script', 'my_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
-}
-add_action('wp_enqueue_scripts', 'enqueue_custom_script');
-
 // Adicionar shortcode para o formulário e exibição de áudio
 add_shortcode('form_1_shortcode', 'form_1_shortcode');
 function form_1_shortcode() {
