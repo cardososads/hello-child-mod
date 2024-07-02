@@ -11,17 +11,16 @@ class NumerologyCalculator {
         $month = intval($parts[1]);
         $year = intval($parts[2]);
 
-        // Reduz cada parte a um único dígito ou número mestre, mantendo números mestres
-        $day = $this->reduceToSingleDigitOrMasterNumber($day);
-        $month = $this->reduceToSingleDigitOrMasterNumber($month);
-        $year = $this->reduceToSingleDigitOrMasterNumber($year);
+        // Reduz cada parte a um único dígito ou número mestre
+        $day = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($day));
+        $month = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($month));
+        $year = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($year));
 
         // Soma as reduções e reduz a um único dígito ou número mestre
         $destinyNumber = $this->reduceToSingleDigitOrMasterNumber($day + $month + $year);
 
         return $destinyNumber;
     }
-
     // Função para calcular o número de expressão
     public function calculateExpressionNumber($fullName) {
         $fullNameValue = $this->convertNameToNumber($fullName);
@@ -76,9 +75,16 @@ class NumerologyCalculator {
 
     // Reduz um número para um único dígito, exceto os números mestres 11, 22 e 33
     private function reduceToSingleDigitOrMasterNumber($number) {
-        while ($number > 9 && !in_array($number, [11, 22, 33])) {
+        // Verifica se o número é um número mestre (11, 22, 33)
+        if (in_array($number, [11, 22, 33])) {
+            return $number; // Retorna o número mestre sem redução
+        }
+
+        // Reduz o número para um único dígito
+        while ($number > 9) {
             $number = $this->sumDigits($number);
         }
         return $number;
     }
+
 }
