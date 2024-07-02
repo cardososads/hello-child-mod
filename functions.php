@@ -37,7 +37,9 @@ add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 
 require_once get_template_directory() . 'classes/class-numerology-calculator.php';
 
-function calculate_destiny_number() {
+function render_and_calculate_destiny_number($atts) {
+    $elementor_form_id = $atts['id']; // ID do formulário do Elementor
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['first_name']) && isset($_POST['birth_date'])) {
         $calculator = new NumerologyCalculator();
         $firstName = sanitize_text_field($_POST['first_name']);
@@ -45,25 +47,7 @@ function calculate_destiny_number() {
         $destinyNumber = $calculator->calculateDestinyNumber($firstName, $birthDate);
         var_dump($destinyNumber); // Exibe o resultado
     }
-}
-add_shortcode('calculate_destiny_number', 'calculate_destiny_number');
 
-function calculate_expression_number() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['full_name'])) {
-        $calculator = new NumerologyCalculator();
-        $fullName = sanitize_text_field($_POST['full_name']);
-        $expressionNumber = $calculator->calculateExpressionNumber($fullName);
-        var_dump($expressionNumber); // Exibe o resultado
-    }
+    return \Elementor\Plugin::instance()->frontend->get_builder_content($elementor_form_id, true);
 }
-add_shortcode('calculate_expression_number', 'calculate_expression_number');
-
-function calculate_motivation_number() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['full_name'])) {
-        $calculator = new NumerologyCalculator();
-        $fullName = sanitize_text_field($_POST['full_name']);
-        $motivationNumber = $calculator->calculateMotivationNumber($fullName);
-        var_dump($motivationNumber); // Exibe o resultado
-    }
-}
-add_shortcode('calculate_motivation_number', 'calculate_motivation_number');
+add_shortcode('render_destiny_form', 'render_and_calculate_destiny_number');
