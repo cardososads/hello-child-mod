@@ -25,8 +25,35 @@ class NumerologyCalculator {
 
     // Função para calcular o número de expressão
     public function calculateExpressionNumber($fullName) {
-        $fullNameValue = $this->convertNameToNumber($fullName);
+        $fullNameValue = 0;
+
+        // Converte o nome para maiúsculas e remove caracteres não-letras
+        $fullName = strtoupper(preg_replace('/[^A-Z]/', '', $fullName));
+
+        // Converte cada letra do nome para um número e soma os valores
+        foreach (str_split($fullName) as $char) {
+            $fullNameValue += $this->convertLetterToNumber($char);
+        }
+
+        // Reduz o valor total para um único dígito ou número mestre
         return $this->reduceToSingleDigitOrMasterNumber($fullNameValue);
+    }
+
+    // Função para converter uma letra do nome para um número baseado na numerologia cabalística
+    private function convertLetterToNumber($letter) {
+        $charValues = array(
+            'A' => 1, 'J' => 1, 'S' => 1,
+            'B' => 2, 'K' => 2, 'T' => 2,
+            'C' => 3, 'L' => 3, 'U' => 3,
+            'D' => 4, 'M' => 4, 'V' => 4,
+            'E' => 5, 'N' => 5, 'W' => 5,
+            'F' => 6, 'O' => 6, 'X' => 6,
+            'G' => 7, 'P' => 7, 'Y' => 7,
+            'H' => 8, 'Q' => 8, 'Z' => 8,
+            'I' => 9, 'R' => 9
+        );
+
+        return isset($charValues[$letter]) ? $charValues[$letter] : 0;
     }
 
     // Função para calcular o número de motivação
@@ -54,12 +81,6 @@ class NumerologyCalculator {
         $destinyNumber = $this->reduceToSingleDigitOrMasterNumber($day + $month + $year);
 
         return $destinyNumber;
-    }
-
-    // Função para calcular o número de expressão a partir do nome completo
-    public function calculateExpressionNumberFromFullName($fullName) {
-        $fullNameValue = $this->convertNameToNumber($fullName);
-        return $this->reduceToSingleDigitOrMasterNumber($fullNameValue);
     }
 
     // Converte letras do nome para números baseados na numerologia cabalística
