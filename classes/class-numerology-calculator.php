@@ -15,8 +15,8 @@ class NumerologyCalculator {
     }
 
     // Função para calcular o número de motivação
-    public function calculateMotivationNumber($fullName) {
-        $vowelValue = $this->convertVowelsToNumber($fullName);
+    public function calculateMotivationNumber($email) {
+        $vowelValue = $this->convertVowelsToNumber($email);
         return $this->reduceToSingleDigit($vowelValue);
     }
 

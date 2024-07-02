@@ -38,14 +38,13 @@ add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 // Corrigido para usar get_stylesheet_directory() em vez de get_stylesheet_directory_uri()
 require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
 
+//--------------------------------------------------------------------------------------------------
 
-// Hook para processar o envio do formulário "Form1"
+
+// Hook para processar o envio dos formulários
 add_action('elementor_pro/forms/new_record', function ($record, $handler) {
-    // Verifique se o formulário é 'Form1'
+    // Verifique qual formulário foi enviado
     $form_name = $record->get_form_settings('form_name');
-    if ('Form1' !== $form_name) {
-        return;
-    }
 
     // Obtenha os dados do formulário
     $raw_fields = $record->get('fields');
@@ -54,29 +53,59 @@ add_action('elementor_pro/forms/new_record', function ($record, $handler) {
         $fields[$id] = $field['value'];
     }
 
+    // Instancia a classe de cálculo
+    require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
+    $calculator = new NumerologyCalculator();
+
     // Armazena os dados do formulário usando transients para acesso global
-    set_transient('form1_submission_data', $fields, 60 * 60); // Armazena por 1 hora
+    switch ($form_name) {
+        case 'Form1':
+            // Realiza o cálculo do número de destino
+            $fields['destiny_number'] = $calculator->calculateDestinyNumber($fields['first_name'], $fields['birth_date']);
+            set_transient('form1_submission_data', $fields, 60 * 60); // Armazena por 1 hora
+            break;
+        case 'Form2':
+            // Realiza o cálculo do número de expressão
+            $fields['expression_number'] = $calculator->calculateExpressionNumber($fields['full_name']);
+            set_transient('form2_submission_data', $fields, 60 * 60); // Armazena por 1 hora
+            break;
+        case 'Form3':
+            // Realiza o cálculo do número de motivação
+            $fields['motivation_number'] = $calculator->calculateMotivationNumber($fields['email']);
+            set_transient('form3_submission_data', $fields, 60 * 60); // Armazena por 1 hora
+            break;
+    }
 
 }, 10, 2);
 
-function mostrar_form1_submission_data()
+function mostrar_form_submission_data($form_id)
 {
     // Obtenha os dados armazenados
-    $fields = get_transient('form1_submission_data');
+    $fields = get_transient($form_id . '_submission_data');
 
     if ($fields) {
-        // Mostre os dados do formulário "Form1"
+        // Mostre os dados do formulário
         ob_start();
-        echo '<h2>Dados do Formulário 1:</h2>';
-        echo '<p>Primeiro Nome: ' . esc_html($fields['first_name']) . '</p>';
-        echo '<p>Data de Nascimento: ' . esc_html($fields['birth_date']) . '</p>';
-        // Aqui você pode adicionar mais campos conforme necessário
+        echo '<h2>Dados do ' . esc_html($form_id) . ':</h2>';
+        foreach ($fields as $key => $value) {
+            echo '<p>' . esc_html(ucwords(str_replace('_', ' ', $key))) . ': ' . esc_html($value) . '</p>';
+        }
         return ob_get_clean();
     } else {
         return 'Nenhuma submissão recente de formulário encontrada.';
     }
 }
 
-add_shortcode('mostrar_form1_dados', 'mostrar_form1_submission_data');
+// Shortcodes para exibir os dados dos formulários
+add_shortcode('mostrar_form1_dados', function () {
+    return mostrar_form_submission_data('form1');
+});
 
+add_shortcode('mostrar_form2_dados', function () {
+    return mostrar_form_submission_data('form2');
+});
+
+add_shortcode('mostrar_form3_dados', function () {
+    return mostrar_form_submission_data('form3');
+});
 
