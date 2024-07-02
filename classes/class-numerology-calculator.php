@@ -21,6 +21,7 @@ class NumerologyCalculator {
 
         return $destinyNumber;
     }
+
     // Função para calcular o número de expressão
     public function calculateExpressionNumber($fullName) {
         $fullNameValue = $this->convertNameToNumber($fullName);
@@ -31,6 +32,27 @@ class NumerologyCalculator {
     public function calculateMotivationNumber($fullName) {
         $vowelValue = $this->convertVowelsToNumber($fullName);
         return $this->reduceToSingleDigitOrMasterNumber($vowelValue);
+    }
+
+    // Função para calcular o número de destino a partir da data de nascimento
+    public function calculateDestinyNumberFromDateOfBirth($birthDate) {
+        // Supondo que a data de nascimento esteja no formato 'DD-MM-YYYY'
+        $parts = explode('-', $birthDate);
+
+        // Extrai dia, mês e ano
+        $day = intval($parts[0]);
+        $month = intval($parts[1]);
+        $year = intval($parts[2]);
+
+        // Reduz cada parte a um único dígito ou número mestre
+        $day = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($day));
+        $month = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($month));
+        $year = $this->reduceToSingleDigitOrMasterNumber($this->sumDigits($year));
+
+        // Soma as reduções e reduz a um único dígito ou número mestre
+        $destinyNumber = $this->reduceToSingleDigitOrMasterNumber($day + $month + $year);
+
+        return $destinyNumber;
     }
 
     // Converte letras do nome para números baseados na numerologia cabalística
