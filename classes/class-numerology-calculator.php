@@ -80,6 +80,11 @@ class NumerologyCalculator {
         return $sum;
     }
 
+    // Soma os dígitos de um número
+    private function sumDigits($number) {
+        return array_sum(str_split($number));
+    }
+
     // Reduz um número para um único dígito, exceto os números mestres 11, 22 e 33
     private function reduceToSingleDigit($number) {
         while ($number > 9 && $number != 11 && $number != 22 && $number != 33) {

@@ -61,7 +61,7 @@ add_action('elementor_pro/forms/new_record', function ($record, $handler) {
     switch ($form_name) {
         case 'Form1':
             // Realiza o cálculo do número de destino
-            $fields['destiny_number'] = $calculator->calculateDestinyNumber($fields['first_name'], $fields['birth_date']);
+            $fields['destiny_number'] = $calculator->calculateDestinyNumber($fields['birth_date']);
             set_transient('form1_submission_data', $fields, 60 * 60); // Armazena por 1 hora
             break;
         case 'Form2':
