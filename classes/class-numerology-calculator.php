@@ -29,8 +29,8 @@ class NumerologyCalculator {
     }
 
     // Função para calcular o número de motivação
-    public function calculateMotivationNumber($email) {
-        $vowelValue = $this->convertVowelsToNumber($email);
+    public function calculateMotivationNumber($fullName) {
+        $vowelValue = $this->convertVowelsToNumber($fullName);
         return $this->reduceToSingleDigit($vowelValue);
     }
 
@@ -69,17 +69,6 @@ class NumerologyCalculator {
         return $sum;
     }
 
-    // Converte data de nascimento para um número
-    private function convertDateToNumber($date) {
-        $sum = 0;
-        foreach (str_split($date) as $char) {
-            if (is_numeric($char)) {
-                $sum += intval($char);
-            }
-        }
-        return $sum;
-    }
-
     // Soma os dígitos de um número
     private function sumDigits($number) {
         return array_sum(str_split($number));
@@ -87,7 +76,7 @@ class NumerologyCalculator {
 
     // Reduz um número para um único dígito, exceto os números mestres 11, 22 e 33
     private function reduceToSingleDigit($number) {
-        while ($number > 9 && $number != 11 && $number != 22 && $number != 33) {
+        while ($number > 9 && !in_array($number, [11, 22, 33])) {
             $number = array_sum(str_split($number));
         }
         return $number;
