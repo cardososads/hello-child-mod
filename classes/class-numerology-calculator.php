@@ -2,10 +2,24 @@
 class NumerologyCalculator {
 
     // Função para calcular o número de destino
-    public function calculateDestinyNumber($firstName, $birthDate) {
-        $firstNameValue = $this->convertNameToNumber($firstName);
-        $birthDateValue = $this->convertDateToNumber($birthDate);
-        return $this->reduceToSingleDigit($firstNameValue + $birthDateValue);
+    public function calculateDestinyNumber($birthDate) {
+        // Supondo que a data de nascimento esteja no formato 'DD-MM-YYYY'
+        $parts = explode('-', $birthDate);
+
+        // Extrai dia, mês e ano
+        $day = intval($parts[0]);
+        $month = intval($parts[1]);
+        $year = intval($parts[2]);
+
+        // Reduz cada parte a um único dígito ou número mestre
+        $day = $this->reduceToSingleDigit($this->sumDigits($day));
+        $month = $this->reduceToSingleDigit($this->sumDigits($month));
+        $year = $this->reduceToSingleDigit($this->sumDigits($year));
+
+        // Soma as reduções e reduz a um único dígito ou número mestre
+        $destinyNumber = $this->reduceToSingleDigit($day + $month + $year);
+
+        return $destinyNumber;
     }
 
     // Função para calcular o número de expressão
