@@ -38,32 +38,9 @@ add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 // Corrigido para usar get_stylesheet_directory() em vez de get_stylesheet_directory_uri()
 require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
 
-$elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
 
-function render_and_calculate_destiny_number($atts) {
-    ob_start();
-
-    // Renderize o formulário do Elementor
-    $elementor_form_id = $atts['id']; // ID do formulário do Elementor
-    echo \Elementor\Plugin::instance()->frontend->get_builder_content($elementor_form_id, true);
-
-    // Verifique se há dados de sessão
-    if (isset($_SESSION['name_number']) && isset($_SESSION['birth_number'])) {
-        echo '<h2>Resultados:</h2>';
-        echo '<p>Número do Nome: ' . $_SESSION['name_number'] . '</p>';
-        echo '<p>Número do Destino: ' . $_SESSION['birth_number'] . '</p>';
-
-        // Limpar os dados da sessão
-        unset($_SESSION['name_number']);
-        unset($_SESSION['birth_number']);
-    }
-
-    return ob_get_clean();
-}
-add_shortcode('render_destiny_form', 'render_and_calculate_destiny_number');
-
-// Hook para processar o envio do formulário
-add_action('elementor_pro/forms/new_record', function($record, $handler) {
+// Hook para processar o envio do formulário "Form1"
+add_action('elementor_pro/forms/new_record', function ($record, $handler) {
     // Verifique se o formulário é 'Form1'
     $form_name = $record->get_form_settings('form_name');
     if ('Form1' !== $form_name) {
@@ -77,34 +54,29 @@ add_action('elementor_pro/forms/new_record', function($record, $handler) {
         $fields[$id] = $field['value'];
     }
 
-    // Armazene os dados do formulário em uma opção temporária
+    // Armazena os dados do formulário usando transients para acesso global
     set_transient('form1_submission_data', $fields, 60 * 60); // Armazena por 1 hora
-
-    // Calcula o número de destino
-    $calculator = new NumerologyCalculator();
-    $firstName = sanitize_text_field($fields['first_name']);
-    $birthDate = sanitize_text_field($fields['birth_date']);
-    $destinyNumber = $calculator->calculateDestinyNumber($firstName, $birthDate);
-
-    // Armazene os resultados na sessão
-    $_SESSION['name_number'] = $firstName;
-    $_SESSION['birth_number'] = $destinyNumber;
 
 }, 10, 2);
 
-function mostrar_form1_submission_data() {
+function mostrar_form1_submission_data()
+{
     // Obtenha os dados armazenados
     $fields = get_transient('form1_submission_data');
 
     if ($fields) {
-        // Mostre os dados usando var_dump
+        // Mostre os dados do formulário "Form1"
         ob_start();
-        echo '<pre>';
-        var_dump($fields);
-        echo '</pre>';
+        echo '<h2>Dados do Formulário 1:</h2>';
+        echo '<p>Primeiro Nome: ' . esc_html($fields['first_name']) . '</p>';
+        echo '<p>Data de Nascimento: ' . esc_html($fields['birth_date']) . '</p>';
+        // Aqui você pode adicionar mais campos conforme necessário
         return ob_get_clean();
     } else {
         return 'Nenhuma submissão recente de formulário encontrada.';
     }
 }
+
 add_shortcode('mostrar_form1_dados', 'mostrar_form1_submission_data');
+
+
