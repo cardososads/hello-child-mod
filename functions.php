@@ -35,7 +35,7 @@ function hello_elementor_child_scripts_styles() {
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 
-require_once get_template_directory() . 'classes/class-numerology-calculator.php';
+require_once get_stylesheet_directory() . 'classes/class-numerology-calculator.php';
 
 function render_and_calculate_destiny_number($atts) {
     $elementor_form_id = $atts['id']; // ID do formulário do Elementor
