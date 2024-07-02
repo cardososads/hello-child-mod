@@ -1,4 +1,5 @@
 <?php
+
 class NumerologyCalculator {
 
     // Função para calcular o número de destino
@@ -53,6 +54,12 @@ class NumerologyCalculator {
         $destinyNumber = $this->reduceToSingleDigitOrMasterNumber($day + $month + $year);
 
         return $destinyNumber;
+    }
+
+    // Função para calcular o número de expressão a partir do nome completo
+    public function calculateExpressionNumberFromFullName($fullName) {
+        $fullNameValue = $this->convertNameToNumber($fullName);
+        return $this->reduceToSingleDigitOrMasterNumber($fullNameValue);
     }
 
     // Converte letras do nome para números baseados na numerologia cabalística
