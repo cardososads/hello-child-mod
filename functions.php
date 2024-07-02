@@ -11,7 +11,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+    exit; // Exit if accessed directly.
 }
 
 define( 'HELLO_ELEMENTOR_CHILD_VERSION', '2.0.0' );
@@ -23,19 +23,20 @@ define( 'HELLO_ELEMENTOR_CHILD_VERSION', '2.0.0' );
  */
 function hello_elementor_child_scripts_styles() {
 
-	wp_enqueue_style(
-		'hello-elementor-child-style',
-		get_stylesheet_directory_uri() . '/style.css',
-		[
-			'hello-elementor-theme-style',
-		],
-		HELLO_ELEMENTOR_CHILD_VERSION
-	);
+    wp_enqueue_style(
+        'hello-elementor-child-style',
+        get_stylesheet_directory_uri() . '/style.css',
+        [
+            'hello-elementor-theme-style',
+        ],
+        HELLO_ELEMENTOR_CHILD_VERSION
+    );
 
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 
-require_once get_stylesheet_directory_uri() . 'classes/class-numerology-calculator.php';
+// Corrigido para usar get_stylesheet_directory() em vez de get_stylesheet_directory_uri()
+require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
 
 function render_and_calculate_destiny_number($atts) {
     $elementor_form_id = $atts['id']; // ID do formulário do Elementor
