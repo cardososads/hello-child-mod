@@ -11,13 +11,13 @@ class NumerologyCalculator {
         $month = intval($parts[1]);
         $year = intval($parts[2]);
 
-        // Reduz cada parte a um único dígito ou número mestre
-        $day = $this->reduceToSingleDigit($this->sumDigits($day));
-        $month = $this->reduceToSingleDigit($this->sumDigits($month));
-        $year = $this->reduceToSingleDigit($this->sumDigits($year));
+        // Reduz cada parte a um único dígito ou número mestre, mantendo números mestres
+        $day = $this->reduceToSingleDigitOrMasterNumber($day);
+        $month = $this->reduceToSingleDigitOrMasterNumber($month);
+        $year = $this->reduceToSingleDigitOrMasterNumber($year);
 
         // Soma as reduções e reduz a um único dígito ou número mestre
-        $destinyNumber = $this->reduceToSingleDigit($day + $month + $year);
+        $destinyNumber = $this->reduceToSingleDigitOrMasterNumber($day + $month + $year);
 
         return $destinyNumber;
     }
@@ -25,13 +25,13 @@ class NumerologyCalculator {
     // Função para calcular o número de expressão
     public function calculateExpressionNumber($fullName) {
         $fullNameValue = $this->convertNameToNumber($fullName);
-        return $this->reduceToSingleDigit($fullNameValue);
+        return $this->reduceToSingleDigitOrMasterNumber($fullNameValue);
     }
 
     // Função para calcular o número de motivação
     public function calculateMotivationNumber($fullName) {
         $vowelValue = $this->convertVowelsToNumber($fullName);
-        return $this->reduceToSingleDigit($vowelValue);
+        return $this->reduceToSingleDigitOrMasterNumber($vowelValue);
     }
 
     // Converte letras do nome para números baseados na numerologia cabalística
@@ -75,9 +75,9 @@ class NumerologyCalculator {
     }
 
     // Reduz um número para um único dígito, exceto os números mestres 11, 22 e 33
-    private function reduceToSingleDigit($number) {
+    private function reduceToSingleDigitOrMasterNumber($number) {
         while ($number > 9 && !in_array($number, [11, 22, 33])) {
-            $number = array_sum(str_split($number));
+            $number = $this->sumDigits($number);
         }
         return $number;
     }
