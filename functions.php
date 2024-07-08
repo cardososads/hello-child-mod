@@ -113,18 +113,32 @@ add_shortcode('mostrar_form3_dados', function () {
 require_once get_stylesheet_directory() . '/classes/class-audio-manager.php';
 require_once get_stylesheet_directory() . '/classes/class-audio-player.php';
 
-function custom_audio_shortcode($atts) {
+function custom_audio_introductions_shortcode() {
     // Instancia o AudioManager
     $audio_manager = new AudioManager();
 
-    // Obtém todos os áudios disponíveis
-    $audios = $audio_manager->getAllAudios();
+    // Obtém os áudios introdutórios
+    $introductions = $audio_manager->getIntroductions();
 
-    // Exibe os dados com var_dump
-    ob_start();
-    var_dump($audios);
-    $output = ob_get_clean();
+    // Renderiza os áudios e legendas
+    $output = '';
+    foreach ($introductions as $key => $audio) {
+        $output .= '<audio controls>';
+        $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
+        $output .= '</audio>';
+
+        if (!empty($audio['subtitle'])) {
+            $output .= '<p>' . $audio['subtitle'] . '</p>';
+        }
+
+        // Incluir o script de legendas JS
+        if (!empty($audio['subtitles_js'])) {
+            $output .= '<script>';
+            $output .= $audio['subtitles_js'];
+            $output .= '</script>';
+        }
+    }
 
     return $output;
 }
-add_shortcode('custom_audio_dump', 'custom_audio_shortcode');
+add_shortcode('custom_audio_introductions', 'custom_audio_introductions_shortcode');
