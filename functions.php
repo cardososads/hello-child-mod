@@ -112,7 +112,9 @@ add_shortcode('mostrar_form3_dados', function () {
 function exibir_audios_shortcode() {
     // Recupera os dados da página de opções
     $audios_data = get_option('_audios');
-
+    echo '<pre>';
+    var_dump($audios_data);
+    echo '</pre>';
     // Verifica se existem dados
     if (!$audios_data) {
         return 'Nenhum áudio encontrado.';
