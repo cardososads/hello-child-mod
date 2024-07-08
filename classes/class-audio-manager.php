@@ -11,11 +11,8 @@ class AudioManager {
         $audios = array();
 
         foreach ($keys as $key) {
-            if (isset($this->audios_data[$key]['src'])) {
-                $audios[] = array(
-                    'src' => esc_url($this->audios_data[$key]['src']),
-                    'subtitle' => isset($this->audios_data[$key]['subtitle']) ? stripslashes($this->audios_data[$key]['subtitle']) : '',
-                );
+            if (isset($this->audios_data[$key])) {
+                $audios[] = $this->audios_data[$key];
             }
         }
 
