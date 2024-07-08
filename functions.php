@@ -114,93 +114,120 @@ function exibir_audios_com_legendas_shortcode() {
 
     // Recupera os dados da página de opções
     $audios_data = get_option('_audios');
-    echo '<pre>';
-    var_dump($audios_data);
-    echo '</pre>';
+
     // Verifica se existem dados
     if (!$audios_data) {
         return 'Nenhum áudio encontrado.';
     }
 
     ?>
-    <div id="audio-legenda" style="display: none;"></div>
+    <div id="audio-legenda" style="font-size: 16px; margin-top: 10px;"></div>
     <div id="audios-container">
-        <?php
-        foreach ($audios_data as $key => $value) {
-            if (strpos($key, '_audio') !== false) {
-                echo '<audio controls autoplay style="width: 100%;" data-legenda-key="' . esc_attr($key) . '">';
-                echo '<source src="' . esc_url($value) . '" type="audio/mpeg">';
-                echo 'Seu navegador não suporta o elemento de áudio.';
-                echo '</audio>';
-            }
-        }
-        ?>
+        <audio id="audio-intro" controls autoplay style="width: 100%;">
+            <source src="<?php echo esc_url($audios_data['_audio-introdutorio']); ?>" type="audio/mpeg">
+            Seu navegador não suporta o elemento de áudio.
+        </audio>
+        <audio id="audio-pos-intro" controls style="width: 100%; display: none;">
+            <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
+            Seu navegador não suporta o elemento de áudio.
+        </audio>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const audioElements = document.querySelectorAll('audio[data-legenda-key]');
+            const audioIntro = document.getElementById('audio-intro');
+            const audioPosIntro = document.getElementById('audio-pos-intro');
             const legendaElement = document.getElementById('audio-legenda');
             let timeoutIDs = [];
 
+            const subtitlesIntro = [
+                { time: 0, text: "Olá, tudo bem?" },
+                { time: 2.5, text: "Nesse momento vamos iniciar nossa jornada de conhecimento," },
+                { time: 5.8, text: "entendendo como seu nome, data de nascimento e assinatura" },
+                { time: 9.5, text: "revelam muitos aspectos sobre sua vida." },
+                { time: 12.7, text: "Com a numerologia cabalística saberemos sobre oportunidades," },
+                { time: 16, text: "relacionamento, desafios, e outros fatos que podem te ajudar" },
+                { time: 20.5, text: "a ter autoconhecimento e uma visão única e profunda" },
+                { time: 23, text: "sobre diversos aspectos da sua existência." }
+            ];
+
+            const subtitlesPosIntro = []; // Adicione as legendas de _legenda-pos-intro aqui se houver
+
             const handleSubtitles = (subtitles) => {
-                timeoutIDs.forEach(id => clearTimeout(id));  // Clear previous timeouts
+                timeoutIDs.forEach(id => clearTimeout(id));
                 timeoutIDs = [];
 
                 subtitles.forEach(subtitle => {
                     const timeoutID = setTimeout(() => {
                         legendaElement.textContent = subtitle.text;
-                        legendaElement.style.display = "block";
                     }, subtitle.time * 1000);
                     timeoutIDs.push(timeoutID);
                 });
             };
 
-            audioElements.forEach(audio => {
-                const legendaKey = audio.getAttribute('data-legenda-key').replace('_audio', '_legenda');
-                const subtitles = <?php echo json_encode($audios_data); ?>[legendaKey] || [];
-
-                const parsedSubtitles = subtitles.map(leg => {
-                    const parts = leg.split('::');
-                    return {
-                        time: parseFloat(parts[0]),
-                        text: parts[1]
-                    };
-                });
-
-                const playAudio = (audioElement) => {
-                    setTimeout(() => {
-                        audioElement.play().catch(error => {
-                            console.log('Autoplay foi bloqueado. Tentando novamente.');
-                            setTimeout(() => playAudio(audioElement), 1000);
-                        });
-                    }, 1000);
-                };
-
-                playAudio(audio);
-
-                audio.addEventListener('play', () => handleSubtitles(parsedSubtitles));
-                audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-
-                audio.addEventListener('seeked', () => {
-                    timeoutIDs.forEach(id => clearTimeout(id));
-                    timeoutIDs = [];
-
-                    const currentTime = audio.currentTime;
-                    parsedSubtitles.forEach(subtitle => {
-                        if (subtitle.time >= currentTime) {
-                            const timeoutID = setTimeout(() => {
-                                legendaElement.textContent = subtitle.text;
-                                legendaElement.style.display = "block";
-                            }, (subtitle.time - currentTime) * 1000);
-                            timeoutIDs.push(timeoutID);
-                        }
+            const playAudio = (audioElement) => {
+                setTimeout(() => {
+                    audioElement.play().catch(error => {
+                        console.log('Autoplay foi bloqueado. Tentando novamente.');
+                        setTimeout(() => playAudio(audioElement), 1000);
                     });
-                });
+                }, 1000);
+            };
 
-                audio.addEventListener('ended', () => {
-                    legendaElement.textContent = "";
-                    legendaElement.style.display = "none";
+            playAudio(audioIntro);
+
+            audioIntro.addEventListener('play', () => handleSubtitles(subtitlesIntro));
+            audioPosIntro.addEventListener('play', () => handleSubtitles(subtitlesPosIntro));
+
+            audioIntro.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+            audioPosIntro.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+
+            audioIntro.addEventListener('seeked', () => {
+                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs = [];
+
+                const currentTime = audioIntro.currentTime;
+                subtitlesIntro.forEach(subtitle => {
+                    if (subtitle.time >= currentTime) {
+                        const timeoutID = setTimeout(() => {
+                            legendaElement.textContent = subtitle.text;
+                        }, (subtitle.time - currentTime) * 1000);
+                        timeoutIDs.push(timeoutID);
+                    }
                 });
+            });
+
+            audioPosIntro.addEventListener('seeked', () => {
+                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs = [];
+
+                const currentTime = audioPosIntro.currentTime;
+                subtitlesPosIntro.forEach(subtitle => {
+                    if (subtitle.time >= currentTime) {
+                        const timeoutID = setTimeout(() => {
+                            legendaElement.textContent = subtitle.text;
+                        }, (subtitle.time - currentTime) * 1000);
+                        timeoutIDs.push(timeoutID);
+                    }
+                });
+            });
+
+            audioIntro.addEventListener('ended', () => {
+                legendaElement.textContent = "";
+                audioPosIntro.style.display = 'block';
+                playAudio(audioPosIntro);
+            });
+
+            audioPosIntro.addEventListener('ended', () => {
+                legendaElement.textContent = "";
+            });
+
+            audioPosIntro.addEventListener('play', () => {
+                audioIntro.style.display = 'none';
+                audioIntro.pause();
+            });
+
+            audioPosIntro.addEventListener('ended', () => {
+                audioIntro.style.display = 'block';
             });
         });
     </script>
