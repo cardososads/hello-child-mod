@@ -109,27 +109,7 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
-// Função para criar o shortcode que exibe o áudio baseado nos dados do formulário
-function display_audio_with_get($atts) {
-    // Atribui os valores dos atributos (parâmetros) aos dados do formulário
-    $form_id = isset($atts['form_id']) ? sanitize_text_field($atts['form_id']) : '';
-    $fields = get_transient($form_id . '_submission_data');
-
-    if ($fields) {
-        // Obtenha o número de destino, expressão ou motivação com base no form_id
-        $criteria = '';
-        if ($form_id == 'form1') {
-            $criteria = $fields['destiny_number'];
-        } elseif ($form_id == 'form2') {
-            $criteria = $fields['expression_number'];
-        } elseif ($form_id == 'form3') {
-            $criteria = $fields['motivation_number'];
-        }
-
-        // Chame o shortcode original com os parâmetros fornecidos
-        return do_shortcode('[display_audio criteria="' . $criteria . '" type="' . $form_id . '"]');
-    }
-    return 'Nenhuma submissão recente de formulário encontrada.';
-}
-// Adiciona o shortcode ao WordPress
-add_shortcode('display_audio_with_get', 'display_audio_with_get');
+function jet_data(){
+    $audios = get_field("_audios");
+    var_dump($audios);
+} add_shortcode( 'dados_jet', 'jet_data' );
