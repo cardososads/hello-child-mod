@@ -109,3 +109,45 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
+function get_audio_url($criteria, $type) {
+    $audios = get_option('_audios');
+    
+    if ($type == 'numero_destino') {
+        foreach ($audios['_numeros_destino_516'] as $audio) {
+            if ($audio['numero'] == $criteria) {
+                return $audio['_audio_do_numero'];
+            }
+        }
+    } elseif ($type == 'numero_expressao') {
+        foreach ($audios["_numeros_expressao_$criteria"] as $audio) {
+            if ($audio['numero'] == $criteria) {
+                return $audio['_audio_do_numero'];
+            }
+        }
+    } elseif ($type == 'numero_motivacao') {
+        foreach ($audios["_numeros_motivacao_$criteria"] as $audio) {
+            if ($audio['numero'] == $criteria) {
+                return $audio['_audio_do_numero'];
+            }
+        }
+    }
+
+    return null;
+}
+
+function display_audio_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'criteria' => '',
+        'type' => ''
+    ), $atts);
+
+    $audio_url = get_audio_url($atts['criteria'], $atts['type']);
+
+    if ($audio_url) {
+        return '<audio controls><source src="' . $audio_url . '" type="audio/mpeg">Your browser does not support the audio element.</audio>';
+    } else {
+        return '<p>Áudio não encontrado.</p>';
+    }
+}
+add_shortcode('display_audio', 'display_audio_shortcode');
+
