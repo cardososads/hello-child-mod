@@ -109,175 +109,24 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
+// Incluir as classes necessárias
+require_once get_stylesheet_directory() . '/classes/class-audio-manager.php';
+require_once get_stylesheet_directory() . '/classes/class-audio-player.php';
+
+// Função para exibir o formulário e os áudios
 function form_shortcode() {
+    $audio_manager = new AudioManager();
+    $audio_player = new AudioPlayer($audio_manager);
+
     ob_start();
 
-    // Obtém os dados dos áudios
-    $audios_data = get_option('_audios');
-    ?>
-    <pre><?php var_dump($audios_data); ?></pre>
-    <div id="text"></div>
-
-    <?php
     // Verifica o slug da página para determinar o formulário do Elementor
     global $post;
     $slug = $post->post_name;
 
-    if ($slug === 'form-02') {
-        // Se for o formulário form-02, exibe os três áudios
-        ?>
-        <audio id="audioIntrodutorio" controls autoplay style="width: 100%">
-            <source src="<?php echo esc_url($audios_data['_audio-introdutorio']); ?>" type="audio/mpeg">
-        </audio>
-        <audio id="entradaDestino" controls style="width: 100%; display: none;">
-            <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
-        </audio>
-        <audio id="audioDestino" controls style="width: 100%; display: none;">
-            <source src="<?php echo esc_url($audios_data['numeros']['item-0']['_audio_do_numero']); ?>" type="audio/mpeg">
-        </audio>
-        <?php
-    } else {
-        // Caso contrário, exibe apenas os dois áudios padrão
-        ?>
-        <audio id="audioIntrodutorio" controls autoplay style="width: 100%">
-            <source src="<?php echo esc_url($audios_data['_audio-introdutorio']); ?>" type="audio/mpeg">
-        </audio>
-        <audio id="entradaDestino" controls style="width: 100%; display: none;">
-            <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
-        </audio>
-        <?php
-    }
-
-    // Script JS para controlar a reprodução e legendas
-    ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            <?php echo stripslashes($audios_data['_legenda-intro']); ?>;
-            <?php echo stripslashes($audios_data['_legenda-pos-intro']); ?>;
-            <?php echo stripslashes($audios_data['numeros']['item-0']['_legenda_do_audio']); ?>;
-
-            const audio = document.getElementById('audioIntrodutorio');
-            const secondAudio = document.getElementById('entradaDestino');
-            const destinyAudio = document.getElementById('audioDestino');
-            const textDiv = document.getElementById('text');
-            let timeoutIDs = [];
-
-            const playAudio = (audioElement) => {
-                setTimeout(() => {
-                    audioElement.play().catch(error => {
-                        console.log('Autoplay foi bloqueado. Tentando novamente.');
-                        setTimeout(() => playAudio(audioElement), 1000);
-                    });
-                }, 1000);
-            };
-
-            playAudio(audio);
-
-            const handleSubtitles = (subtitles) => {
-                timeoutIDs.forEach(id => clearTimeout(id));  // Limpa timeouts anteriores
-                timeoutIDs = [];
-
-                subtitles.forEach(subtitle => {
-                    const timeoutID = setTimeout(() => {
-                        textDiv.textContent = subtitle.text;
-                    }, subtitle.time * 1000);
-                    timeoutIDs.push(timeoutID);
-                });
-            };
-
-            audio.addEventListener('play', () => handleSubtitles(subtitles));
-            secondAudio.addEventListener('play', () => handleSubtitles(secondSubtitles));
-            destinyAudio.addEventListener('play', () => handleSubtitles(destinySubtitles));
-
-            audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-            secondAudio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-            destinyAudio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-
-            audio.addEventListener('seeked', () => {
-                timeoutIDs.forEach(id => clearTimeout(id));
-                timeoutIDs = [];
-
-                const currentTime = audio.currentTime;
-                subtitles.forEach(subtitle => {
-                    if (subtitle.time >= currentTime) {
-                        const timeoutID = setTimeout(() => {
-                            textDiv.textContent = subtitle.text;
-                        }, (subtitle.time - currentTime) * 1000);
-                        timeoutIDs.push(timeoutID);
-                    }
-                });
-            });
-
-            secondAudio.addEventListener('seeked', () => {
-                timeoutIDs.forEach(id => clearTimeout(id));
-                timeoutIDs = [];
-
-                const currentTime = secondAudio.currentTime;
-                secondSubtitles.forEach(subtitle => {
-                    if (subtitle.time >= currentTime) {
-                        const timeoutID = setTimeout(() => {
-                            textDiv.textContent = subtitle.text;
-                        }, (subtitle.time - currentTime) * 1000);
-                        timeoutIDs.push(timeoutID);
-                    }
-                });
-            });
-
-            destinyAudio.addEventListener('seeked', () => {
-                timeoutIDs.forEach(id => clearTimeout(id));
-                timeoutIDs = [];
-
-                const currentTime = destinyAudio.currentTime;
-                destinySubtitles.forEach(subtitle => {
-                    if (subtitle.time >= currentTime) {
-                        const timeoutID = setTimeout(() => {
-                            textDiv.textContent = subtitle.text;
-                        }, (subtitle.time - currentTime) * 1000);
-                        timeoutIDs.push(timeoutID);
-                    }
-                });
-            });
-
-            audio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-                secondAudio.style.display = 'block';
-                playAudio(secondAudio);
-            });
-
-            secondAudio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-                destinyAudio.style.display = 'block';
-                playAudio(destinyAudio);
-            });
-
-            destinyAudio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-            });
-
-            // Mostra e esconde players conforme necessário
-            secondAudio.addEventListener('play', () => {
-                audio.style.display = 'none';
-                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
-            });
-
-            destinyAudio.addEventListener('play', () => {
-                audio.style.display = 'none';
-                secondAudio.style.display = 'none';
-                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
-                secondAudio.pause(); // Pausa o segundo áudio caso esteja tocando
-            });
-
-            // Mostra o primeiro player novamente se necessário
-            secondAudio.addEventListener('ended', () => {
-                audio.style.display = 'block';
-            });
-
-            destinyAudio.addEventListener('ended', () => {
-                audio.style.display = 'block';
-            });
-        });
-    </script>
-    <?php
+    // Exemplo: Renderiza apenas os áudios 'audio_introdutorio' e 'entrada_destino'
+    $audio_keys = array('audio_introdutorio', 'entrada_destino');
+    echo $audio_player->renderAudios($audio_keys);
 
     // Adicione o formulário do Elementor com o ID desejado
     $elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
