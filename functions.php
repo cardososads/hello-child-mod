@@ -123,6 +123,15 @@ function form_shortcode() {
     global $post;
     $slug = $post->post_name;
 
+    // Recupera o número de destino do transient
+    $birth_number = '';
+    if ($slug !== 'form-01') { // Ajuste aqui com o slug correto do primeiro formulário
+        $form1_data = get_transient('form1_submission_data');
+        if ($form1_data && isset($form1_data['destiny_number'])) {
+            $birth_number = $form1_data['destiny_number'];
+        }
+    }
+
     if ($slug === 'form-02') {
         // Se for o formulário form-02, exibe os três áudios
         ?>
@@ -132,9 +141,11 @@ function form_shortcode() {
         <audio id="entradaDestino" controls style="width: 100%; display: none;">
             <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
         </audio>
-        <audio id="audioDestino" controls style="width: 100%; display: none;">
-            <source src="<?php echo esc_url($audios_data['numeros']['item-0']['_audio_do_numero']); ?>" type="audio/mpeg">
-        </audio>
+        <?php if (!empty($birth_number) && isset($audios_data['numeros']['item-' . $birth_number]['_audio_do_numero'])) : ?>
+            <audio id="audioDestino" controls style="width: 100%; display: none;">
+                <source src="<?php echo esc_url($audios_data['numeros']['item-' . $birth_number]['_audio_do_numero']); ?>" type="audio/mpeg">
+            </audio>
+        <?php endif; ?>
         <?php
     } else {
         // Caso contrário, exibe apenas os dois áudios padrão
@@ -154,7 +165,7 @@ function form_shortcode() {
         document.addEventListener('DOMContentLoaded', function () {
             <?php echo stripslashes($audios_data['_legenda-intro']); ?>;
             <?php echo stripslashes($audios_data['_legenda-pos-intro']); ?>;
-            <?php echo stripslashes($audios_data['numeros']['item-0']['_legenda_do_audio']); ?>;
+            <?php echo isset($birth_number) && isset($audios_data['numeros']['item-' . $birth_number]['_legenda_do_audio']) ? stripslashes($audios_data['numeros']['item-' . $birth_number]['_legenda_do_audio']) : ''; ?>;
 
             const audio = document.getElementById('audioIntrodutorio');
             const secondAudio = document.getElementById('entradaDestino');
