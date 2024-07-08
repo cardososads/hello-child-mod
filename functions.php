@@ -117,12 +117,37 @@ function custom_audio_introductions_shortcode() {
     // Instancia o AudioManager
     $audio_manager = new AudioManager();
 
-    // Obtém os áudios introdutórios
+    // Obter número de destino da transiente
+    $form1_data = get_transient('form1_submission_data');
+    $destiny_number = !empty($form1_data['destiny_number']) ? $form1_data['destiny_number'] : null;
+
+    // Obtém os áudios introdutórios e do número de destino
     $introductions = $audio_manager->getIntroductions();
+    $destiny_audios = $audio_manager->getDestinyAudios($destiny_number);
 
     // Renderiza os áudios e legendas
     $output = '';
+
+    // Renderiza os áudios de introdução
     foreach ($introductions as $key => $audio) {
+        $output .= '<audio controls>';
+        $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
+        $output .= '</audio>';
+
+        if (!empty($audio['subtitle'])) {
+            $output .= '<p>' . $audio['subtitle'] . '</p>';
+        }
+
+        // Incluir o script de legendas JS
+        if (!empty($audio['subtitles_js'])) {
+            $output .= '<script>';
+            $output .= $audio['subtitles_js'];
+            $output .= '</script>';
+        }
+    }
+
+    // Renderiza os áudios do número de destino
+    foreach ($destiny_audios as $key => $audio) {
         $output .= '<audio controls>';
         $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $output .= '</audio>';
