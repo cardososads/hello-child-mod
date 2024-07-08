@@ -39,21 +39,7 @@ add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
 
 //--------------------------------------------------------------------------------------------------
-function enqueue_custom_scripts() {
-    // Registrar o script
-    wp_register_script(
-        'custom-functions', // Handle do script
-        get_stylesheet_directory() . 'functions.js', // URL do script
-        array('jquery'), // Dependências (pode ser um array vazio se não houver dependências)
-        null, // Versão do script (pode ser null para desativar a versão)
-        true // Carregar no footer
-    );
 
-    // Enfileirar o script
-    wp_enqueue_script('custom-functions');
-}
-
-// Adicionar a função ao hook wp_enqueue_scripts
 
 // Hook para processar o envio dos formulários
 add_action('elementor_pro/forms/new_record', function ($record, $handler) {
@@ -123,45 +109,27 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
-function get_audio_url($criteria, $type) {
-    $audios = get_option('_audios');
-    
-    if ($type == 'numero_destino') {
-        foreach ($audios['_numeros_destino_516'] as $audio) {
-            if ($audio['numero'] == $criteria) {
-                return $audio['_audio_do_numero'];
-            }
+// Função para criar o shortcode que exibe o áudio baseado nos dados do formulário
+function display_audio_with_get($atts) {
+    // Atribui os valores dos atributos (parâmetros) aos dados do formulário
+    $form_id = isset($atts['form_id']) ? sanitize_text_field($atts['form_id']) : '';
+    $fields = get_transient($form_id . '_submission_data');
+
+    if ($fields) {
+        // Obtenha o número de destino, expressão ou motivação com base no form_id
+        $criteria = '';
+        if ($form_id == 'form1') {
+            $criteria = $fields['destiny_number'];
+        } elseif ($form_id == 'form2') {
+            $criteria = $fields['expression_number'];
+        } elseif ($form_id == 'form3') {
+            $criteria = $fields['motivation_number'];
         }
-    } elseif ($type == 'numero_expressao') {
-        foreach ($audios["_numeros_expressao_$criteria"] as $audio) {
-            if ($audio['numero'] == $criteria) {
-                return $audio['_audio_do_numero'];
-            }
-        }
-    } elseif ($type == 'numero_motivacao') {
-        foreach ($audios["_numeros_motivacao_$criteria"] as $audio) {
-            if ($audio['numero'] == $criteria) {
-                return $audio['_audio_do_numero'];
-            }
-        }
+
+        // Chame o shortcode original com os parâmetros fornecidos
+        return do_shortcode('[display_audio criteria="' . $criteria . '" type="' . $form_id . '"]');
     }
-
-    return null;
+    return 'Nenhuma submissão recente de formulário encontrada.';
 }
-
-function display_audio_shortcode($atts) {
-    $atts = shortcode_atts(array(
-        'criteria' => '',
-        'type' => ''
-    ), $atts);
-
-    $audio_url = get_audio_url($atts['criteria'], $atts['type']);
-
-    if ($audio_url) {
-        return '<audio controls><source src="' . $audio_url . '" type="audio/mpeg">Your browser does not support the audio element.</audio>';
-    } else {
-        return '<p>Áudio não encontrado.</p>';
-    }
-}
-add_shortcode('display_audio', 'display_audio_shortcode');
-
+// Adiciona o shortcode ao WordPress
+add_shortcode('display_audio_with_get', 'display_audio_with_get');
