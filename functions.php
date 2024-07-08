@@ -108,3 +108,38 @@ add_shortcode('mostrar_form2_dados', function () {
 add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
+
+function exibir_audios_shortcode() {
+    // Recupera os dados da página de opções
+    $audios_data = get_option('_audios');
+
+    // Verifica se existem dados
+    if (!$audios_data) {
+        return 'Nenhum áudio encontrado.';
+    }
+
+    // Inicia a variável de saída
+    $output = '<div class="audios-list">';
+
+    // Itera pelos campos de áudio
+    foreach ($audios_data as $key => $value) {
+        if (strpos($key, '_audio') !== false) {
+            $output .= '<div class="audio-item">';
+            $output .= '<audio controls>';
+            $output .= '<source src="' . esc_url($value) . '" type="audio/mpeg">';
+            $output .= 'Seu navegador não suporta o elemento de áudio.';
+            $output .= '</audio>';
+            $output .= '</div>';
+        } elseif (strpos($key, '_legenda') !== false) {
+            $output .= '<div class="audio-legenda">';
+            $output .= '<p>' . esc_html($value) . '</p>';
+            $output .= '</div>';
+        }
+    }
+
+    // Fecha a div principal
+    $output .= '</div>';
+
+    return $output;
+}
+add_shortcode('exibir_audios', 'exibir_audios_shortcode');
