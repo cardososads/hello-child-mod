@@ -109,7 +109,8 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
-function jet_data(){
-    $audios = get_field("_audios");
+
+add_shortcode( 'dados_jet', function (){
+    $audios = get_field('_audios');
     var_dump($audios);
-} add_shortcode( 'dados_jet', 'jet_data' );
+});
