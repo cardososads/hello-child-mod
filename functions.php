@@ -207,5 +207,3 @@ function exibir_audios_com_legendas_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('exibir_audios_com_legendas', 'exibir_audios_com_legendas_shortcode');
-
-
