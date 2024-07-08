@@ -112,9 +112,7 @@ add_shortcode('mostrar_form3_dados', function () {
 function exibir_audios_shortcode() {
     // Recupera os dados da página de opções
     $audios_data = get_option('_audios');
-    echo '<pre>';
-    var_dump($audios_data);
-    echo '</pre>';
+
     // Verifica se existem dados
     if (!$audios_data) {
         return 'Nenhum áudio encontrado.';
@@ -123,18 +121,17 @@ function exibir_audios_shortcode() {
     // Inicia a variável de saída
     $output = '<div class="audios-list">';
 
+    // Adiciona um contêiner para as legendas
+    $output .= '<div id="audio-legenda" style="display: none;"></div>';
+
     // Itera pelos campos de áudio
     foreach ($audios_data as $key => $value) {
         if (strpos($key, '_audio') !== false) {
             $output .= '<div class="audio-item">';
-            $output .= '<audio controls>';
+            $output .= '<audio controls autoplay>';
             $output .= '<source src="' . esc_url($value) . '" type="audio/mpeg">';
             $output .= 'Seu navegador não suporta o elemento de áudio.';
             $output .= '</audio>';
-            $output .= '</div>';
-        } elseif (strpos($key, '_legenda') !== false) {
-            $output .= '<div class="audio-legenda">';
-            $output .= '<p>' . esc_html($value) . '</p>';
             $output .= '</div>';
         }
     }
@@ -142,6 +139,25 @@ function exibir_audios_shortcode() {
     // Fecha a div principal
     $output .= '</div>';
 
+    // Adiciona os scripts para lidar com as legendas
+    $output .= '
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const legendas = ' . json_encode($audios_data) . ';
+                for (const key in legendas) {
+                    if (key.includes("_legenda")) {
+                        const legendaElement = document.getElementById("audio-legenda");
+                        setTimeout(function() {
+                            legendaElement.textContent = legendas[key];
+                            legendaElement.style.display = "block";
+                        }, Number(key.split("_")[2]) * 1000);
+                    }
+                }
+            });
+        </script>
+    ';
+
     return $output;
 }
 add_shortcode('exibir_audios', 'exibir_audios_shortcode');
+
