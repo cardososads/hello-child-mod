@@ -113,12 +113,13 @@ add_shortcode('mostrar_form3_dados', function () {
 require_once get_stylesheet_directory() . '/classes/class-audio-manager.php';
 require_once get_stylesheet_directory() . '/classes/class-audio-player.php';
 
+// Função para registrar o shortcode e renderizar os áudios introdutórios
 function custom_audio_introductions_shortcode() {
     // Instancia o AudioManager
     $audio_manager = new AudioManager();
 
     // Obtém os áudios introdutórios
-    $introductions = $audio_manager->getIntroductions();
+    $introductions = $audio_manager->getIntrodutoryAudios();
 
     // Renderiza os áudios e legendas
     $output = '';
