@@ -152,6 +152,11 @@ function form_shortcode() {
             <?php
             echo stripslashes($audio_intro['_legenda-intro']);
             echo stripslashes($audio_intro['_legenda-pos-intro']);
+
+            // Definir as legendas corretas
+            $subtitles = isset($audio_intro['_legenda-intro']) ? json_encode(stripslashes($audio_intro['_legenda-intro'])) : '[]';
+            $secondSubtitles = isset($audio_intro['_legenda-pos-intro']) ? json_encode(stripslashes($audio_intro['_legenda-pos-intro'])) : '[]';
+            $destinySubtitles = isset($audio_intro['numeros']['item-0']['_legenda_do_audio']) ? json_encode(stripslashes($audio_intro['numeros']['item-0']['_legenda_do_audio'])) : '[]';
             ?>
 
             const audios = document.querySelectorAll('audio');
@@ -172,8 +177,16 @@ function form_shortcode() {
 
                 audio.addEventListener('play', () => {
                     const audioId = audio.id;
-                    const subtitlesKey = audioId === 'audio_0' ? '_legenda-intro' : '_legenda-pos-intro';
-                    handleSubtitles(<?php echo json_encode(stripslashes($audio_intro[$subtitlesKey])); ?>);
+                    let subtitles = [];
+                    if (audioId === 'audio_0') {
+                        subtitles = <?php echo $subtitles; ?>;
+                    } else if (audioId === 'audio_1') {
+                        subtitles = <?php echo $secondSubtitles; ?>;
+                    } else if (audioId === 'audio_2') {
+                        subtitles = <?php echo $destinySubtitles; ?>;
+                    }
+
+                    handleSubtitles(subtitles);
                 });
 
                 audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
@@ -182,8 +195,14 @@ function form_shortcode() {
                     timeoutIDs = [];
 
                     const currentTime = audio.currentTime;
-                    const subtitlesKey = audio.id === 'audio_0' ? '_legenda-intro' : '_legenda-pos-intro';
-                    const subtitles = <?php echo json_encode(stripslashes($audio_intro[$subtitlesKey])); ?>;
+                    let subtitles = [];
+                    if (audio.id === 'audio_0') {
+                        subtitles = <?php echo $subtitles; ?>;
+                    } else if (audio.id === 'audio_1') {
+                        subtitles = <?php echo $secondSubtitles; ?>;
+                    } else if (audio.id === 'audio_2') {
+                        subtitles = <?php echo $destinySubtitles; ?>;
+                    }
 
                     subtitles.forEach(subtitle => {
                         if (subtitle.time >= currentTime) {
