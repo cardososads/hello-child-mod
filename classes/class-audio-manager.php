@@ -7,15 +7,7 @@ class AudioManager {
         $this->audios_data = get_option('_audios');
     }
 
-    public function getAudiosByKeys($keys = array()) {
-        $audios = array();
-
-        foreach ($keys as $key) {
-            if (isset($this->audios_data[$key])) {
-                $audios[] = $this->audios_data[$key];
-            }
-        }
-
-        return $audios;
+    public function getAllAudios() {
+        return $this->audios_data;
     }
 }

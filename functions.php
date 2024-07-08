@@ -114,33 +114,17 @@ require_once get_stylesheet_directory() . '/classes/class-audio-manager.php';
 require_once get_stylesheet_directory() . '/classes/class-audio-player.php';
 
 function custom_audio_shortcode($atts) {
-    $atts = shortcode_atts(array(
-        'keys' => '', // Chaves dos áudios a serem exibidos
-    ), $atts);
-
-    // Converte as chaves dos áudios em um array
-    $audio_keys = explode(',', $atts['keys']);
-
     // Instancia o AudioManager
     $audio_manager = new AudioManager();
 
-    // Obtém os áudios baseados nas chaves fornecidas
-    $audios = $audio_manager->getAudiosByKeys($audio_keys);
+    // Obtém todos os áudios disponíveis
+    $audios = $audio_manager->getAllAudios();
 
-    // Renderiza os áudios
-    $output = '';
-    foreach ($audios as $audio) {
-        if (!empty($audio['src'])) {
-            $output .= '<audio controls>';
-            $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
-            $output .= '</audio>';
-
-            if (!empty($audio['subtitle'])) {
-                $output .= '<p>' . $audio['subtitle'] . '</p>';
-            }
-        }
-    }
+    // Exibe os dados com var_dump
+    ob_start();
+    var_dump($audios);
+    $output = ob_get_clean();
 
     return $output;
 }
-add_shortcode('custom_audio', 'custom_audio_shortcode');
+add_shortcode('custom_audio_dump', 'custom_audio_shortcode');
