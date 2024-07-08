@@ -111,55 +111,54 @@ add_shortcode('mostrar_form3_dados', function () {
 
 function form_shortcode() {
     ob_start();
-    $audio_intro = get_option('_audios');
 
-    // Pegar o número de destino da sessão
-    $birth_number = isset($_SESSION['birth_number']) ? $_SESSION['birth_number'] : '';
+    // Obtém os dados dos áudios
+    $audios_data = get_option('_audios');
+    ?>
+    <pre><?php var_dump($audios_data); ?></pre>
+    <div id="text"></div>
 
-    // Verificar o formulário do Elementor na página atual pelo slug
+    <?php
+    // Verifica o slug da página para determinar o formulário do Elementor
     global $post;
     $slug = $post->post_name;
 
-    // Determinar os áudios com base no formulário Elementor
-    $audio_sources = [];
-    switch ($slug) {
-        case 'form-02':
-            // Formulário 02: 3 áudios
-            $audio_sources[] = esc_url($audio_intro['_audio-introdutorio']);
-            $audio_sources[] = esc_url($audio_intro['_pos-intro']);
-            // Adicionar áudio de acordo com o número de destino
-            if (!empty($birth_number) && isset($audio_intro['numeros']['item-' . $birth_number])) {
-                $audio_sources[] = esc_url($audio_intro['numeros']['item-' . $birth_number]['_audio_do_numero']);
-            }
-            break;
-        default:
-            // Outros formulários: Usar áudios padrão
-            $audio_sources[] = esc_url($audio_intro['_audio-introdutorio']);
-            $audio_sources[] = esc_url($audio_intro['_pos-intro']);
-            break;
+    if ($slug === 'form-02') {
+        // Se for o formulário form-02, exibe os três áudios
+        ?>
+        <audio id="audioIntrodutorio" controls autoplay style="width: 100%">
+            <source src="<?php echo esc_url($audios_data['_audio-introdutorio']); ?>" type="audio/mpeg">
+        </audio>
+        <audio id="entradaDestino" controls style="width: 100%; display: none;">
+            <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
+        </audio>
+        <audio id="audioDestino" controls style="width: 100%; display: none;">
+            <source src="<?php echo esc_url($audios_data['numeros']['item-0']['_audio_do_numero']); ?>" type="audio/mpeg">
+        </audio>
+        <?php
+    } else {
+        // Caso contrário, exibe apenas os dois áudios padrão
+        ?>
+        <audio id="audioIntrodutorio" controls autoplay style="width: 100%">
+            <source src="<?php echo esc_url($audios_data['_audio-introdutorio']); ?>" type="audio/mpeg">
+        </audio>
+        <audio id="entradaDestino" controls style="width: 100%; display: none;">
+            <source src="<?php echo esc_url($audios_data['_pos-intro']); ?>" type="audio/mpeg">
+        </audio>
+        <?php
     }
 
+    // Script JS para controlar a reprodução e legendas
     ?>
-    <div id="text"></div>
-    <?php foreach ($audio_sources as $index => $audio_src) : ?>
-        <audio id="audio_<?php echo $index; ?>" controls autoplay style="width: 100%">
-            <source src="<?php echo $audio_src; ?>" type="audio/mpeg">
-        </audio>
-    <?php endforeach; ?>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            <?php
-            echo stripslashes($audio_intro['_legenda-intro']);
-            echo stripslashes($audio_intro['_legenda-pos-intro']);
+            <?php echo stripslashes($audios_data['_legenda-intro']); ?>;
+            <?php echo stripslashes($audios_data['_legenda-pos-intro']); ?>;
+            <?php echo stripslashes($audios_data['numeros']['item-0']['_legenda_do_audio']); ?>;
 
-            // Definir as legendas corretas
-            $subtitles = isset($audio_intro['_legenda-intro']) ? json_encode(stripslashes($audio_intro['_legenda-intro'])) : '[]';
-            $secondSubtitles = isset($audio_intro['_legenda-pos-intro']) ? json_encode(stripslashes($audio_intro['_legenda-pos-intro'])) : '[]';
-            $destinySubtitles = isset($audio_intro['numeros']['item-0']['_legenda_do_audio']) ? json_encode(stripslashes($audio_intro['numeros']['item-0']['_legenda_do_audio'])) : '[]';
-            ?>
-
-            const audios = document.querySelectorAll('audio');
+            const audio = document.getElementById('audioIntrodutorio');
+            const secondAudio = document.getElementById('entradaDestino');
+            const destinyAudio = document.getElementById('audioDestino');
             const textDiv = document.getElementById('text');
             let timeoutIDs = [];
 
@@ -172,59 +171,10 @@ function form_shortcode() {
                 }, 1000);
             };
 
-            audios.forEach(audio => {
-                playAudio(audio);
-
-                audio.addEventListener('play', () => {
-                    const audioId = audio.id;
-                    let subtitles = [];
-                    if (audioId === 'audio_0') {
-                        subtitles = <?php echo $subtitles; ?>;
-                    } else if (audioId === 'audio_1') {
-                        subtitles = <?php echo $secondSubtitles; ?>;
-                    } else if (audioId === 'audio_2') {
-                        subtitles = <?php echo $destinySubtitles; ?>;
-                    }
-
-                    handleSubtitles(subtitles);
-                });
-
-                audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-                audio.addEventListener('seeked', () => {
-                    timeoutIDs.forEach(id => clearTimeout(id));
-                    timeoutIDs = [];
-
-                    const currentTime = audio.currentTime;
-                    let subtitles = [];
-                    if (audio.id === 'audio_0') {
-                        subtitles = <?php echo $subtitles; ?>;
-                    } else if (audio.id === 'audio_1') {
-                        subtitles = <?php echo $secondSubtitles; ?>;
-                    } else if (audio.id === 'audio_2') {
-                        subtitles = <?php echo $destinySubtitles; ?>;
-                    }
-
-                    subtitles.forEach(subtitle => {
-                        if (subtitle.time >= currentTime) {
-                            const timeoutID = setTimeout(() => {
-                                textDiv.textContent = subtitle.text;
-                            }, (subtitle.time - currentTime) * 1000);
-                            timeoutIDs.push(timeoutID);
-                        }
-                    });
-                });
-
-                audio.addEventListener('ended', () => {
-                    textDiv.textContent = "";
-                    const nextAudio = audio.nextElementSibling;
-                    if (nextAudio) {
-                        playAudio(nextAudio);
-                    }
-                });
-            });
+            playAudio(audio);
 
             const handleSubtitles = (subtitles) => {
-                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs.forEach(id => clearTimeout(id));  // Limpa timeouts anteriores
                 timeoutIDs = [];
 
                 subtitles.forEach(subtitle => {
@@ -234,29 +184,105 @@ function form_shortcode() {
                     timeoutIDs.push(timeoutID);
                 });
             };
+
+            audio.addEventListener('play', () => handleSubtitles(subtitles));
+            secondAudio.addEventListener('play', () => handleSubtitles(secondSubtitles));
+            destinyAudio.addEventListener('play', () => handleSubtitles(destinySubtitles));
+
+            audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+            secondAudio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+            destinyAudio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+
+            audio.addEventListener('seeked', () => {
+                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs = [];
+
+                const currentTime = audio.currentTime;
+                subtitles.forEach(subtitle => {
+                    if (subtitle.time >= currentTime) {
+                        const timeoutID = setTimeout(() => {
+                            textDiv.textContent = subtitle.text;
+                        }, (subtitle.time - currentTime) * 1000);
+                        timeoutIDs.push(timeoutID);
+                    }
+                });
+            });
+
+            secondAudio.addEventListener('seeked', () => {
+                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs = [];
+
+                const currentTime = secondAudio.currentTime;
+                secondSubtitles.forEach(subtitle => {
+                    if (subtitle.time >= currentTime) {
+                        const timeoutID = setTimeout(() => {
+                            textDiv.textContent = subtitle.text;
+                        }, (subtitle.time - currentTime) * 1000);
+                        timeoutIDs.push(timeoutID);
+                    }
+                });
+            });
+
+            destinyAudio.addEventListener('seeked', () => {
+                timeoutIDs.forEach(id => clearTimeout(id));
+                timeoutIDs = [];
+
+                const currentTime = destinyAudio.currentTime;
+                destinySubtitles.forEach(subtitle => {
+                    if (subtitle.time >= currentTime) {
+                        const timeoutID = setTimeout(() => {
+                            textDiv.textContent = subtitle.text;
+                        }, (subtitle.time - currentTime) * 1000);
+                        timeoutIDs.push(timeoutID);
+                    }
+                });
+            });
+
+            audio.addEventListener('ended', () => {
+                textDiv.textContent = "";
+                secondAudio.style.display = 'block';
+                playAudio(secondAudio);
+            });
+
+            secondAudio.addEventListener('ended', () => {
+                textDiv.textContent = "";
+                destinyAudio.style.display = 'block';
+                playAudio(destinyAudio);
+            });
+
+            destinyAudio.addEventListener('ended', () => {
+                textDiv.textContent = "";
+            });
+
+            // Mostra e esconde players conforme necessário
+            secondAudio.addEventListener('play', () => {
+                audio.style.display = 'none';
+                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
+            });
+
+            destinyAudio.addEventListener('play', () => {
+                audio.style.display = 'none';
+                secondAudio.style.display = 'none';
+                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
+                secondAudio.pause(); // Pausa o segundo áudio caso esteja tocando
+            });
+
+            // Mostra o primeiro player novamente se necessário
+            secondAudio.addEventListener('ended', () => {
+                audio.style.display = 'block';
+            });
+
+            destinyAudio.addEventListener('ended', () => {
+                audio.style.display = 'block';
+            });
         });
     </script>
     <?php
+
     // Adicione o formulário do Elementor com o ID desejado
     $elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
     echo \Elementor\Plugin::instance()->frontend->get_builder_content($elementor_form_id, true);
 
-    if (isset($_SESSION['name_number']) && isset($_SESSION['birth_number'])) {
-        echo '<h2>Resultados:</h2>';
-        echo '<p>Número do Nome: ' . $_SESSION['name_number'] . '</p>';
-        echo '<p>Número do Destino: ' . $_SESSION['birth_number'] . '</p>';
-
-        // Adicionar o áudio baseado nos resultados
-        $audio_file = get_stylesheet_directory_uri() . '/audio/result_audio_' . $_SESSION['name_number'] . '.mp3';
-        echo '<audio controls autoplay>
-                <source src="' . esc_url($audio_file) . '" type="audio/mpeg">
-                Seu navegador não suporta o elemento de áudio.
-              </audio>';
-
-        // Limpar os dados da sessão
-        unset($_SESSION['name_number']);
-        unset($_SESSION['birth_number']);
-    }
     return ob_get_clean();
 }
 
