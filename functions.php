@@ -112,61 +112,49 @@ add_shortcode('mostrar_form3_dados', function () {
 function form_shortcode() {
     ob_start();
     $audio_intro = get_option('_audios');
-    $numeros_destino = get_option('_numeros_destino_516'); // Ajuste o nome da opção conforme necessário
 
-    // Obtém o slug da página atual
+    // Pegar o número de destino da sessão
+    $birth_number = isset($_SESSION['birth_number']) ? $_SESSION['birth_number'] : '';
+
+    // Verificar o formulário do Elementor na página atual pelo slug
     global $post;
     $slug = $post->post_name;
 
-    // Determina qual índice do array de destino usar com base no slug
-    $indice_destino = 1; // Padrão para slug "form-01"
-    if ($slug == 'form-02') {
-        $indice_destino = 2; // Usar o terceiro áudio para "form-02"
+    // Determinar os áudios com base no formulário Elementor
+    $audio_sources = [];
+    switch ($slug) {
+        case 'form-02':
+            // Formulário 02: 3 áudios
+            $audio_sources[] = esc_url($audio_intro['_audio-introdutorio']);
+            $audio_sources[] = esc_url($audio_intro['_pos-intro']);
+            // Adicionar áudio de acordo com o número de destino
+            if (!empty($birth_number) && isset($audio_intro['numeros']['item-' . $birth_number])) {
+                $audio_sources[] = esc_url($audio_intro['numeros']['item-' . $birth_number]['_audio_do_numero']);
+            }
+            break;
+        default:
+            // Outros formulários: Usar áudios padrão
+            $audio_sources[] = esc_url($audio_intro['_audio-introdutorio']);
+            $audio_sources[] = esc_url($audio_intro['_pos-intro']);
+            break;
     }
 
-    // Verifica se o índice de destino existe no array
-    if (isset($numeros_destino["item-$indice_destino"])) {
-        $audio_destino = $numeros_destino["item-$indice_destino"]['_audio_do_numero'];
-        $legenda_destino = $numeros_destino["item-$indice_destino"]['_legenda_do_audio'];
-    } else {
-        // Caso não exista, use um valor padrão ou lógica alternativa
-        $audio_destino = ''; // Defina um valor padrão ou lógica alternativa aqui
-        $legenda_destino = '';
-    }
     ?>
-
     <div id="text"></div>
-
-    <audio id="audioIntrodutorio" controls autoplay style="width: 100%">
-        <source src="<?php echo esc_url($audio_intro['_audio-introdutorio']); ?>" type="audio/mpeg">
-    </audio>
-
-    <audio id="entradaDestino" controls style="width: 100%; display: none;">
-        <source src="<?php echo esc_url($audio_intro['_pos-intro']); ?>" type="audio/mpeg">
-    </audio>
-
-    <audio id="audioDestino" controls style="width: 100%; display: none;">
-        <source src="<?php echo esc_url($audio_destino); ?>" type="audio/mpeg">
-    </audio>
+    <?php foreach ($audio_sources as $index => $audio_src) : ?>
+        <audio id="audio_<?php echo $index; ?>" controls autoplay style="width: 100%">
+            <source src="<?php echo $audio_src; ?>" type="audio/mpeg">
+        </audio>
+    <?php endforeach; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            <?php echo stripslashes($audio_intro['_legenda-intro']); ?>
+            <?php
+            echo stripslashes($audio_intro['_legenda-intro']);
+            echo stripslashes($audio_intro['_legenda-pos-intro']);
+            ?>
 
-            const subtitles = [
-                { time: 0, text: "Olá, tudo bem?" },
-                { time: 2.5, text: "Nesse momento vamos iniciar nossa jornada de conhecimento," },
-                { time: 5.8, text: "entendendo como seu nome, data de nascimento e assinatura" },
-                { time: 9.5, text: "revelam muitos aspectos sobre sua vida." },
-                { time: 12.7, text: "Com a numerologia cabalística saberemos sobre oportunidades," },
-                { time: 16, text: "relacionamento, desafios, e outros fatos que podem te ajudar" },
-                { time: 20.5, text: "a ter autoconhecimento e uma visão única e profunda" },
-                { time: 23, text: "sobre diversos aspectos da sua existência." }
-            ];
-
-            const audio = document.getElementById('audioIntrodutorio');
-            const secondAudio = document.getElementById('entradaDestino');
-            const thirdAudio = document.getElementById('audioDestino');
+            const audios = document.querySelectorAll('audio');
             const textDiv = document.getElementById('text');
             let timeoutIDs = [];
 
@@ -179,10 +167,45 @@ function form_shortcode() {
                 }, 1000);
             };
 
-            playAudio(audio);
+            audios.forEach(audio => {
+                playAudio(audio);
+
+                audio.addEventListener('play', () => {
+                    const audioId = audio.id;
+                    const subtitlesKey = audioId === 'audio_0' ? '_legenda-intro' : '_legenda-pos-intro';
+                    handleSubtitles(<?php echo json_encode(stripslashes($audio_intro[$subtitlesKey])); ?>);
+                });
+
+                audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+                audio.addEventListener('seeked', () => {
+                    timeoutIDs.forEach(id => clearTimeout(id));
+                    timeoutIDs = [];
+
+                    const currentTime = audio.currentTime;
+                    const subtitlesKey = audio.id === 'audio_0' ? '_legenda-intro' : '_legenda-pos-intro';
+                    const subtitles = <?php echo json_encode(stripslashes($audio_intro[$subtitlesKey])); ?>;
+
+                    subtitles.forEach(subtitle => {
+                        if (subtitle.time >= currentTime) {
+                            const timeoutID = setTimeout(() => {
+                                textDiv.textContent = subtitle.text;
+                            }, (subtitle.time - currentTime) * 1000);
+                            timeoutIDs.push(timeoutID);
+                        }
+                    });
+                });
+
+                audio.addEventListener('ended', () => {
+                    textDiv.textContent = "";
+                    const nextAudio = audio.nextElementSibling;
+                    if (nextAudio) {
+                        playAudio(nextAudio);
+                    }
+                });
+            });
 
             const handleSubtitles = (subtitles) => {
-                timeoutIDs.forEach(id => clearTimeout(id));  // Clear previous timeouts
+                timeoutIDs.forEach(id => clearTimeout(id));
                 timeoutIDs = [];
 
                 subtitles.forEach(subtitle => {
@@ -192,67 +215,8 @@ function form_shortcode() {
                     timeoutIDs.push(timeoutID);
                 });
             };
-
-            audio.addEventListener('play', () => handleSubtitles(subtitles));
-
-            audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
-
-            audio.addEventListener('seeked', () => {
-                timeoutIDs.forEach(id => clearTimeout(id));
-                timeoutIDs = [];
-
-                const currentTime = audio.currentTime;
-                subtitles.forEach(subtitle => {
-                    if (subtitle.time >= currentTime) {
-                        const timeoutID = setTimeout(() => {
-                            textDiv.textContent = subtitle.text;
-                        }, (subtitle.time - currentTime) * 1000);
-                        timeoutIDs.push(timeoutID);
-                    }
-                });
-            });
-
-            audio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-                secondAudio.style.display = 'block';
-                playAudio(secondAudio);
-            });
-
-            secondAudio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-                thirdAudio.style.display = 'block';
-                playAudio(thirdAudio);
-            });
-
-            thirdAudio.addEventListener('ended', () => {
-                textDiv.textContent = "";
-            });
-
-            // Novo código para ocultar/desativar o primeiro player quando o segundo player começar a tocar
-            secondAudio.addEventListener('play', () => {
-                audio.style.display = 'none';
-                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
-            });
-
-            thirdAudio.addEventListener('play', () => {
-                audio.style.display = 'none';
-                audio.pause(); // Pausa o primeiro áudio caso esteja tocando
-                secondAudio.style.display = 'none';
-                secondAudio.pause(); // Pausa o segundo áudio caso esteja tocando
-            });
-
-            // Opcional: Mostrar o primeiro player novamente se necessário
-            secondAudio.addEventListener('ended', () => {
-                audio.style.display = 'block';
-            });
-
-            thirdAudio.addEventListener('ended', () => {
-                secondAudio.style.display = 'block';
-            });
-
         });
     </script>
-
     <?php
     // Adicione o formulário do Elementor com o ID desejado
     $elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
@@ -274,7 +238,6 @@ function form_shortcode() {
         unset($_SESSION['name_number']);
         unset($_SESSION['birth_number']);
     }
-
     return ob_get_clean();
 }
 
