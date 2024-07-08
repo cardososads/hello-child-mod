@@ -115,7 +115,7 @@ function form_shortcode() {
     // Obtém os dados dos áudios
     $audios_data = get_option('_audios');
     ?>
-
+    <pre><?php var_dump($audios_data); ?></pre>
     <div id="text"></div>
 
     <?php
