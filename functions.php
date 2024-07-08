@@ -113,30 +113,34 @@ add_shortcode('mostrar_form3_dados', function () {
 require_once get_stylesheet_directory() . '/classes/class-audio-manager.php';
 require_once get_stylesheet_directory() . '/classes/class-audio-player.php';
 
-// Função para exibir o formulário e os áudios
-function form_shortcode() {
+function custom_audio_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'keys' => '', // Chaves dos áudios a serem exibidos
+    ), $atts);
+
+    // Converte as chaves dos áudios em um array
+    $audio_keys = explode(',', $atts['keys']);
+
+    // Instancia o AudioManager
     $audio_manager = new AudioManager();
-    $audio_player = new AudioPlayer($audio_manager);
 
-    ob_start();
+    // Obtém os áudios baseados nas chaves fornecidas
+    $audios = $audio_manager->getAudiosByKeys($audio_keys);
 
-    // Verifica o slug da página para determinar o formulário do Elementor
-    global $post;
-    $slug = $post->post_name;
+    // Renderiza os áudios
+    $output = '';
+    foreach ($audios as $audio) {
+        if (!empty($audio['src'])) {
+            $output .= '<audio controls>';
+            $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
+            $output .= '</audio>';
 
-    // Exemplo: Renderiza apenas os áudios 'audio_introdutorio' e 'entrada_destino'
-    $audio_keys = array('audio_introdutorio', 'entrada_destino');
-    echo $audio_player->renderAudios($audio_keys);
+            if (!empty($audio['subtitle'])) {
+                $output .= '<p>' . $audio['subtitle'] . '</p>';
+            }
+        }
+    }
 
-    // Adicione o formulário do Elementor com o ID desejado
-    $elementor_form_id = 'Form1'; // Substitua pelo ID real do formulário do Elementor
-    echo \Elementor\Plugin::instance()->frontend->get_builder_content($elementor_form_id, true);
-
-    return ob_get_clean();
+    return $output;
 }
-
-// Função para registrar o shortcode
-function register_custom_shortcode() {
-    add_shortcode('custom_form_shortcode', 'form_shortcode');
-}
-add_action('init', 'register_custom_shortcode');
+add_shortcode('custom_audio', 'custom_audio_shortcode');
