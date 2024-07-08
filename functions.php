@@ -39,7 +39,21 @@ add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 require_once get_stylesheet_directory() . '/classes/class-numerology-calculator.php';
 
 //--------------------------------------------------------------------------------------------------
+function enqueue_custom_scripts() {
+    // Registrar o script
+    wp_register_script(
+        'custom-functions', // Handle do script
+        get_stylesheet_directory() . 'functions.js', // URL do script
+        array('jquery'), // Dependências (pode ser um array vazio se não houver dependências)
+        null, // Versão do script (pode ser null para desativar a versão)
+        true // Carregar no footer
+    );
 
+    // Enfileirar o script
+    wp_enqueue_script('custom-functions');
+}
+
+// Adicionar a função ao hook wp_enqueue_scripts
 
 // Hook para processar o envio dos formulários
 add_action('elementor_pro/forms/new_record', function ($record, $handler) {
