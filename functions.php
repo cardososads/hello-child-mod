@@ -109,7 +109,9 @@ add_shortcode('mostrar_form3_dados', function () {
     return mostrar_form_submission_data('form3');
 });
 
-function exibir_audios_shortcode() {
+function exibir_audios_com_legendas_shortcode() {
+    ob_start();
+
     // Recupera os dados da página de opções
     $audios_data = get_option('_audios');
 
@@ -118,46 +120,92 @@ function exibir_audios_shortcode() {
         return 'Nenhum áudio encontrado.';
     }
 
-    // Inicia a variável de saída
-    $output = '<div class="audios-list">';
-
-    // Adiciona um contêiner para as legendas
-    $output .= '<div id="audio-legenda" style="display: none;"></div>';
-
-    // Itera pelos campos de áudio
-    foreach ($audios_data as $key => $value) {
-        if (strpos($key, '_audio') !== false) {
-            $output .= '<div class="audio-item">';
-            $output .= '<audio controls autoplay>';
-            $output .= '<source src="' . esc_url($value) . '" type="audio/mpeg">';
-            $output .= 'Seu navegador não suporta o elemento de áudio.';
-            $output .= '</audio>';
-            $output .= '</div>';
+    ?>
+    <div id="audio-legenda" style="display: none;"></div>
+    <div id="audios-container">
+        <?php
+        foreach ($audios_data as $key => $value) {
+            if (strpos($key, '_audio') !== false) {
+                echo '<audio controls autoplay style="width: 100%;" data-legenda-key="' . esc_attr($key) . '">';
+                echo '<source src="' . esc_url($value) . '" type="audio/mpeg">';
+                echo 'Seu navegador não suporta o elemento de áudio.';
+                echo '</audio>';
+            }
         }
-    }
+        ?>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const audioElements = document.querySelectorAll('audio[data-legenda-key]');
+            const legendaElement = document.getElementById('audio-legenda');
+            let timeoutIDs = [];
 
-    // Fecha a div principal
-    $output .= '</div>';
+            const handleSubtitles = (subtitles) => {
+                timeoutIDs.forEach(id => clearTimeout(id));  // Clear previous timeouts
+                timeoutIDs = [];
 
-    // Adiciona os scripts para lidar com as legendas
-    $output .= '
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const legendas = ' . json_encode($audios_data) . ';
-                for (const key in legendas) {
-                    if (key.includes("_legenda")) {
-                        const legendaElement = document.getElementById("audio-legenda");
-                        setTimeout(function() {
-                            legendaElement.textContent = legendas[key];
-                            legendaElement.style.display = "block";
-                        }, Number(key.split("_")[2]) * 1000);
-                    }
-                }
+                subtitles.forEach(subtitle => {
+                    const timeoutID = setTimeout(() => {
+                        legendaElement.textContent = subtitle.text;
+                        legendaElement.style.display = "block";
+                    }, subtitle.time * 1000);
+                    timeoutIDs.push(timeoutID);
+                });
+            };
+
+            audioElements.forEach(audio => {
+                const legendaKey = audio.getAttribute('data-legenda-key').replace('_audio', '_legenda');
+                const subtitles = <?php echo json_encode($audios_data); ?>[legendaKey] || [];
+
+                const parsedSubtitles = subtitles.map(leg => {
+                    const parts = leg.split('::');
+                    return {
+                        time: parseFloat(parts[0]),
+                        text: parts[1]
+                    };
+                });
+
+                const playAudio = (audioElement) => {
+                    setTimeout(() => {
+                        audioElement.play().catch(error => {
+                            console.log('Autoplay foi bloqueado. Tentando novamente.');
+                            setTimeout(() => playAudio(audioElement), 1000);
+                        });
+                    }, 1000);
+                };
+
+                playAudio(audio);
+
+                audio.addEventListener('play', () => handleSubtitles(parsedSubtitles));
+                audio.addEventListener('pause', () => timeoutIDs.forEach(id => clearTimeout(id)));
+
+                audio.addEventListener('seeked', () => {
+                    timeoutIDs.forEach(id => clearTimeout(id));
+                    timeoutIDs = [];
+
+                    const currentTime = audio.currentTime;
+                    parsedSubtitles.forEach(subtitle => {
+                        if (subtitle.time >= currentTime) {
+                            const timeoutID = setTimeout(() => {
+                                legendaElement.textContent = subtitle.text;
+                                legendaElement.style.display = "block";
+                            }, (subtitle.time - currentTime) * 1000);
+                            timeoutIDs.push(timeoutID);
+                        }
+                    });
+                });
+
+                audio.addEventListener('ended', () => {
+                    legendaElement.textContent = "";
+                    legendaElement.style.display = "none";
+                });
             });
-        </script>
-    ';
+        });
+    </script>
+    <?php
 
-    return $output;
+    return ob_get_clean();
 }
-add_shortcode('exibir_audios', 'exibir_audios_shortcode');
+add_shortcode('exibir_audios_com_legendas', 'exibir_audios_com_legendas_shortcode');
+
 
