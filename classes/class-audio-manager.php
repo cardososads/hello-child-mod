@@ -39,8 +39,8 @@ class AudioManager {
         $destiny_audios = array();
 
         // Verifica se existe a categoria de áudios de destino
-        if (isset($this->audios_data['_numeros_destino'])) {
-            foreach ($this->audios_data['_numeros_destino'] as $item) {
+        if (isset($this->audios_data['_numeros_destino_516'])) {
+            foreach ($this->audios_data['_numeros_destino_516'] as $item) {
                 $numero = $item['numero'];
                 $destiny_audios[$numero] = array(
                     'src' => esc_url($item['_audio_do_numero']),
