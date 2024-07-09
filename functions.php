@@ -133,7 +133,7 @@ function custom_audio_introductions_shortcode() {
         // Renderiza os áudios de introdução
         $audio_index = 0;
         foreach ($introductions as $audio) :
-            var_dump($audio);
+            var_dump($audio['subtitle']);
             ?>
             <div class="audio-player" id="audio-player-<?php echo $audio_index; ?>" <?php echo ($audio_index > 0 ? 'style="display:none;"' : ''); ?>>
                 <audio controls <?php echo ($audio_index === 0 ? 'autoplay' : ''); ?>>
