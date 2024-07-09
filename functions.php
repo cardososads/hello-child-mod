@@ -144,7 +144,7 @@ function custom_audio_introductions_shortcode() {
         $output .= $renderAudioPlayer($audio, $audio_index);
 
         if (!empty($audio['subtitles'])) {
-            // Incluir o script de legendas JS
+            // Incluir o script de legendas JS diretamente
             $output .= '<script>';
             $output .= $audio['subtitles'];
             $output .= '</script>';
@@ -159,7 +159,7 @@ function custom_audio_introductions_shortcode() {
         $output .= $renderAudioPlayer($audio, $audio_index);
 
         if (!empty($audio['subtitles'])) {
-            // Incluir o script de legendas JS
+            // Incluir o script de legendas JS diretamente
             $output .= '<script>';
             $output .= $audio['subtitles'];
             $output .= '</script>';
