@@ -127,24 +127,67 @@ function custom_audio_introductions_shortcode() {
 
     // Renderiza os áudios e legendas
     $output = '<div class="audio-player-container">';
+    $output .= '<div id="text"></div>';  // Elemento para exibir as legendas
 
     $audio_index = 0;
 
     // Renderiza os áudios de introdução
     foreach ($introductions as $key => $audio) {
         $output .= '<div class="audio-player" id="audio-player-' . $audio_index . '" ' . ($audio_index > 0 ? 'style="display:none;"' : '') . '>';
-        $output .= '<audio controls ' . ($audio_index === 0 ? 'autoplay' : '') . '>';
+        $output .= '<audio id="audio-' . $audio_index . '" controls ' . ($audio_index === 0 ? 'autoplay' : '') . '>';
         $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $output .= '</audio>';
 
         if (!empty($audio['subtitle'])) {
-            $output .= '<p>' . $audio['subtitle'] . '</p>';
+            $output .= '<p class="audio-subtitle">' . $audio['subtitle'] . '</p>';
         }
 
         // Incluir o script de legendas JS
-        if (!empty($audio['subtitles'])) {
+        if (!empty($audio['subtitles_js'])) {
             $output .= '<script>';
-            $output .= $audio['subtitles'];
+            $output .= 'document.addEventListener("DOMContentLoaded", function () {';
+            $output .=  $audio['subtitles_js'];
+            $output .= 'const audio = document.getElementById("audio-' . $audio_index . '");';
+            $output .= 'const textDiv = document.getElementById("text");';
+            $output .= 'let timeoutIDs = [];';
+
+            $output .= 'const handleSubtitles = (subtitles) => {';
+            $output .= 'timeoutIDs.forEach(id => clearTimeout(id));';
+            $output .= 'timeoutIDs = [];';
+
+            $output .= 'subtitles.forEach(subtitle => {';
+            $output .= 'const timeoutID = setTimeout(() => {';
+            $output .= 'textDiv.textContent = subtitle.text;';
+            $output .= '}, subtitle.time * 1000);';
+            $output .= 'timeoutIDs.push(timeoutID);';
+            $output .= '});';
+            $output .= '};';
+
+            $output .= 'audio.addEventListener("play", () => handleSubtitles(subtitles));';
+            $output .= 'audio.addEventListener("pause", () => timeoutIDs.forEach(id => clearTimeout(id)));';
+            $output .= 'audio.addEventListener("seeked", () => {';
+            $output .= 'timeoutIDs.forEach(id => clearTimeout(id));';
+            $output .= 'timeoutIDs = [];';
+            $output .= 'const currentTime = audio.currentTime;';
+            $output .= 'subtitles.forEach(subtitle => {';
+            $output .= 'if (subtitle.time >= currentTime) {';
+            $output .= 'const timeoutID = setTimeout(() => {';
+            $output .= 'textDiv.textContent = subtitle.text;';
+            $output .= '}, (subtitle.time - currentTime) * 1000);';
+            $output .= 'timeoutIDs.push(timeoutID);';
+            $output .= '}';
+            $output .= '});';
+            $output .= '});';
+            $output .= 'audio.addEventListener("ended", () => {';
+            $output .= 'textDiv.textContent = "";';
+            $output .= 'const nextPlayer = document.getElementById("audio-player-' . ($audio_index + 1) . '");';
+            $output .= 'if (nextPlayer) {';
+            $output .= 'nextPlayer.style.display = "block";';
+            $output .= 'nextPlayer.querySelector("audio").play();';
+            $output .= 'audio.style.display = "none";';
+            $output .= '}';
+            $output .= '});';
+            $output .= '});';
             $output .= '</script>';
         }
         $output .= '</div>';
@@ -156,21 +199,65 @@ function custom_audio_introductions_shortcode() {
     if ($destiny_number !== null && isset($destiny_audios[$destiny_number])) {
         $audio = $destiny_audios[$destiny_number];
         $output .= '<div class="audio-player" id="audio-player-' . $audio_index . '" style="display:none;">';
-        $output .= '<audio controls>';
+        $output .= '<audio id="audio-' . $audio_index . '" controls>';
         $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $output .= '</audio>';
 
         if (!empty($audio['subtitle'])) {
-            $output .= '<p>' . $audio['subtitle'] . '</p>';
+            $output .= '<p class="audio-subtitle">' . $audio['subtitle'] . '</p>';
         }
 
         // Incluir o script de legendas JS
-        if (!empty($audio['subtitles'])) {
+        if (!empty($audio['subtitles_js'])) {
             $output .= '<script>';
-            $output .= $audio['subtitles'];
+            $output .= 'document.addEventListener("DOMContentLoaded", function () {';
+            $output .= $audio['subtitles_js'];
+            $output .= 'const audio = document.getElementById("audio-' . $audio_index . '");';
+            $output .= 'const textDiv = document.getElementById("text");';
+            $output .= 'let timeoutIDs = [];';
+
+            $output .= 'const handleSubtitles = (subtitles) => {';
+            $output .= 'timeoutIDs.forEach(id => clearTimeout(id));';
+            $output .= 'timeoutIDs = [];';
+
+            $output .= 'subtitles.forEach(subtitle => {';
+            $output .= 'const timeoutID = setTimeout(() => {';
+            $output .= 'textDiv.textContent = subtitle.text;';
+            $output .= '}, subtitle.time * 1000);';
+            $output .= 'timeoutIDs.push(timeoutID);';
+            $output .= '});';
+            $output .= '};';
+
+            $output .= 'audio.addEventListener("play", () => handleSubtitles(subtitles));';
+            $output .= 'audio.addEventListener("pause", () => timeoutIDs.forEach(id => clearTimeout(id)));';
+            $output .= 'audio.addEventListener("seeked", () => {';
+            $output .= 'timeoutIDs.forEach(id => clearTimeout(id));';
+            $output .= 'timeoutIDs = [];';
+            $output .= 'const currentTime = audio.currentTime;';
+            $output .= 'subtitles.forEach(subtitle => {';
+            $output .= 'if (subtitle.time >= currentTime) {';
+            $output .= 'const timeoutID = setTimeout(() => {';
+            $output .= 'textDiv.textContent = subtitle.text;';
+            $output .= '}, (subtitle.time - currentTime) * 1000);';
+            $output .= 'timeoutIDs.push(timeoutID);';
+            $output .= '}';
+            $output .= '});';
+            $output .= '});';
+            $output .= 'audio.addEventListener("ended", () => {';
+            $output .= 'textDiv.textContent = "";';
+            $output .= 'const nextPlayer = document.getElementById("audio-player-' . ($audio_index + 1) . '");';
+            $output .= 'if (nextPlayer) {';
+            $output .= 'nextPlayer.style.display = "block";';
+            $output .= 'nextPlayer.querySelector("audio").play();';
+            $output .= 'audio.style.display = "none";';
+            $output .= '}';
+            $output .= '});';
+            $output .= '});';
             $output .= '</script>';
         }
         $output .= '</div>';
+
+        $audio_index++;
     }
 
     $output .= '</div>';
