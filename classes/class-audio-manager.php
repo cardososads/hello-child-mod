@@ -35,18 +35,20 @@ class AudioManager {
         return $introductions;
     }
 
-    public function getDestinyAudios() {
+    public function getDestinyAudios($destiny_number = null) {
         $destiny_audios = array();
 
         // Verifica se existe a categoria de áudios de destino
-        if (isset($this->audios_data['_numeros_destino_516'])) {
-            foreach ($this->audios_data['_numeros_destino_516'] as $item) {
+        if (isset($this->audios_data['_numeros_destino'])) {
+            foreach ($this->audios_data['_numeros_destino'] as $item) {
                 $numero = $item['numero'];
-                $destiny_audios[$numero] = array(
-                    'src' => esc_url($item['_audio_do_numero']),
-                    'subtitle' => isset($item['_legenda_do_audio']) ? stripslashes($item['_legenda_do_audio']) : '',
-                    'subtitles_js' => isset($item['_legenda_do_audio']) ? $item['_legenda_do_audio'] : '',
-                );
+                if ($destiny_number === null || $numero == $destiny_number) {
+                    $destiny_audios[$numero] = array(
+                        'src' => esc_url($item['_audio_do_numero']),
+                        'subtitle' => isset($item['_legenda_do_audio']) ? stripslashes($item['_legenda_do_audio']) : '',
+                        'subtitles_js' => isset($item['_legenda_do_audio']) ? $item['_legenda_do_audio'] : '',
+                    );
+                }
             }
         }
 

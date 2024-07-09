@@ -147,20 +147,22 @@ function custom_audio_introductions_shortcode() {
     }
 
     // Renderiza os áudios do número de destino
-    foreach ($destiny_audios as $key => $audio) {
-        $output .= '<audio controls>';
-        $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
-        $output .= '</audio>';
+    if (!empty($destiny_audios)) {
+        foreach ($destiny_audios as $key => $audio) {
+            $output .= '<audio controls>';
+            $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
+            $output .= '</audio>';
 
-        if (!empty($audio['subtitle'])) {
-            $output .= '<p>' . $audio['subtitle'] . '</p>';
-        }
+            if (!empty($audio['subtitle'])) {
+                $output .= '<p>' . $audio['subtitle'] . '</p>';
+            }
 
-        // Incluir o script de legendas JS
-        if (!empty($audio['subtitles_js'])) {
-            $output .= '<script>';
-            $output .= $audio['subtitles_js'];
-            $output .= '</script>';
+            // Incluir o script de legendas JS
+            if (!empty($audio['subtitles_js'])) {
+                $output .= '<script>';
+                $output .= $audio['subtitles_js'];
+                $output .= '</script>';
+            }
         }
     }
 
