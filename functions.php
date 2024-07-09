@@ -146,7 +146,7 @@ function custom_audio_introductions_shortcode() {
         if (!empty($audio['subtitles_js'])) {
             $output .= '<script>';
             $output .= 'document.addEventListener("DOMContentLoaded", function () {';
-            $output .=  $audio['subtitles_js'];
+            $output .= 'const subtitles = ' . $audio['subtitles_js'] . ';';
             $output .= 'const audio = document.getElementById("audio-' . $audio_index . '");';
             $output .= 'const textDiv = document.getElementById("text");';
             $output .= 'let timeoutIDs = [];';
@@ -211,7 +211,7 @@ function custom_audio_introductions_shortcode() {
         if (!empty($audio['subtitles_js'])) {
             $output .= '<script>';
             $output .= 'document.addEventListener("DOMContentLoaded", function () {';
-            $output .= $audio['subtitles_js'];
+            $output .= 'const subtitles = ' . $audio['subtitles_js'] . ';';
             $output .= 'const audio = document.getElementById("audio-' . $audio_index . '");';
             $output .= 'const textDiv = document.getElementById("text");';
             $output .= 'let timeoutIDs = [];';
