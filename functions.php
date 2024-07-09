@@ -142,9 +142,9 @@ function custom_audio_introductions_shortcode() {
         }
 
         // Incluir o script de legendas JS
-        if (!empty($audio['subtitles_js'])) {
+        if (!empty($audio['subtitles'])) {
             $output .= '<script>';
-            $output .= $audio['subtitles_js'];
+            $output .= $audio['subtitles'];
             $output .= '</script>';
         }
         $output .= '</div>';
@@ -165,9 +165,9 @@ function custom_audio_introductions_shortcode() {
         }
 
         // Incluir o script de legendas JS
-        if (!empty($audio['subtitles_js'])) {
+        if (!empty($audio['subtitles'])) {
             $output .= '<script>';
-            $output .= $audio['subtitles_js'];
+            $output .= $audio['subtitles'];
             $output .= '</script>';
         }
         $output .= '</div>';
