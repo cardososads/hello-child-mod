@@ -124,6 +124,7 @@ function custom_audio_introductions_shortcode() {
     // Obtém os áudios introdutórios e do número de destino
     $introductions = $audio_manager->getIntroductions();
     $destiny_audios = $audio_manager->getDestinyAudios($destiny_number);
+    var_dump($destiny_number);
     //var_dump($destiny_audios);
     // Renderiza os áudios e legendas
     $output = '';
