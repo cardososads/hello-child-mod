@@ -141,7 +141,7 @@ function custom_audio_introductions_shortcode() {
                 </audio>
                 <?php if (!empty($audio['subtitle'])) : ?>
                     <script>
-                        const subtitles = <?php echo $audio['subtitles']; ?>;
+                        <?php echo $audio['subtitle']; ?>
                         const subtitleContainer = document.createElement('div');
                         subtitleContainer.id = 'subtitle-container-<?php echo $audio_index; ?>';
                         subtitleContainer.classList.add('subtitle-container');
