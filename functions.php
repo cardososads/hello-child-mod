@@ -138,6 +138,7 @@ function custom_audio_introductions_shortcode() {
                 <audio controls <?php echo ($audio_index === 0 ? 'autoplay' : ''); ?>>
                     <source src="<?php echo $audio['src']; ?>" type="audio/mpeg">
                 </audio>
+                <?php var_dump($audio['subtitles']); ?>
                 <?php if (!empty($audio['subtitles'])) : ?>
                     <script>
                         const subtitles = <?php echo $audio['subtitles']; ?>;
