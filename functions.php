@@ -130,6 +130,7 @@ function custom_audio_introductions_shortcode() {
 
     // Função para renderizar áudio e legendas
     $renderAudioPlayer = function ($audio, $audio_index) {
+        var_dump($audio['subtitle']);
         $html = '';
         $html .= '<div class="audio-player" id="audio-player-' . $audio_index . '" ' . ($audio_index > 0 ? 'style="display:none;"' : '') . '>';
         $html .= '<audio controls ' . ($audio_index === 0 ? 'autoplay' : '') . '>';
