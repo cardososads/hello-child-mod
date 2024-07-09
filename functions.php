@@ -128,17 +128,13 @@ function custom_audio_introductions_shortcode() {
     $output = '<div class="audio-player-container">';
     $audio_index = 0;
 
-    // Função para renderizar áudio e legendas
+    // Função para renderizar áudio
     $renderAudioPlayer = function ($audio, $audio_index) {
-        var_dump($audio['subtitle']);
         $html = '';
         $html .= '<div class="audio-player" id="audio-player-' . $audio_index . '" ' . ($audio_index > 0 ? 'style="display:none;"' : '') . '>';
         $html .= '<audio controls ' . ($audio_index === 0 ? 'autoplay' : '') . '>';
         $html .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $html .= '</audio>';
-        if (!empty($audio['subtitle'])) {
-            $html .= '<p>' . $audio['subtitle'] . '</p>';
-        }
         $html .= '</div>';
         return $html;
     };
@@ -148,22 +144,9 @@ function custom_audio_introductions_shortcode() {
         $output .= $renderAudioPlayer($audio, $audio_index);
 
         if (!empty($audio['subtitles'])) {
+            // Incluir o script de legendas JS
             $output .= '<script>';
-            $output .= 'const showSubtitles' . $audio_index . ' = () => {';
-            $output .= '    const subtitleContainer = document.createElement("div");';
-            $output .= '    subtitleContainer.classList.add("subtitle-container");';
-            $output .= '    document.getElementById("audio-player-' . $audio_index . '").appendChild(subtitleContainer);';
-            $output .=      $audio['subtitles'];
-            $output .= '    subtitles.forEach(subtitle => {';
-            $output .= '        setTimeout(() => {';
-            $output .= '            const subtitleElement = document.createElement("p");';
-            $output .= '            subtitleElement.textContent = subtitle.text;';
-            $output .= '            subtitleContainer.innerHTML = ""; // Limpa legendas anteriores';
-            $output .= '            subtitleContainer.appendChild(subtitleElement);';
-            $output .= '        }, subtitle.time * 1000); // Converte tempo para milissegundos';
-            $output .= '    });';
-            $output .= '};';
-            $output .= 'showSubtitles' . $audio_index . '();'; // Chama a função para exibir as legendas
+            $output .= $audio['subtitles'];
             $output .= '</script>';
         }
 
@@ -176,22 +159,9 @@ function custom_audio_introductions_shortcode() {
         $output .= $renderAudioPlayer($audio, $audio_index);
 
         if (!empty($audio['subtitles'])) {
+            // Incluir o script de legendas JS
             $output .= '<script>';
-            $output .= 'const showSubtitles' . $audio_index . ' = () => {';
-            $output .= '    const subtitleContainer = document.createElement("div");';
-            $output .= '    subtitleContainer.classList.add("subtitle-container");';
-            $output .= '    document.getElementById("audio-player-' . $audio_index . '").appendChild(subtitleContainer);';
-            $output .= '    const subtitles = ' . json_encode($audio['subtitles']) . ';';
-            $output .= '    subtitles.forEach(subtitle => {';
-            $output .= '        setTimeout(() => {';
-            $output .= '            const subtitleElement = document.createElement("p");';
-            $output .= '            subtitleElement.textContent = subtitle.text;';
-            $output .= '            subtitleContainer.innerHTML = ""; // Limpa legendas anteriores';
-            $output .= '            subtitleContainer.appendChild(subtitleElement);';
-            $output .= '        }, subtitle.time * 1000); // Converte tempo para milissegundos';
-            $output .= '    });';
-            $output .= '};';
-            $output .= 'showSubtitles' . $audio_index . '();'; // Chama a função para exibir as legendas
+            $output .= $audio['subtitles'];
             $output .= '</script>';
         }
 
