@@ -126,7 +126,7 @@ function custom_audio_introductions_shortcode() {
     $destiny_audios = $audio_manager->getDestinyAudios($destiny_number);
     var_dump($destiny_number);
     echo '<pre>';
-    var_dump($destiny_audios['numero']);
+    var_dump($destiny_audios[0]);
     echo '</pre>';
     // Renderiza os áudios e legendas
     $output = '';
