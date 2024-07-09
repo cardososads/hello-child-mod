@@ -171,8 +171,6 @@ function custom_audio_introductions_shortcode() {
             $output .= '</script>';
         }
         $output .= '</div>';
-
-        $audio_index++;
     }
 
     $output .= '</div>';
