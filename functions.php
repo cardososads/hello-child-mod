@@ -128,13 +128,21 @@ function custom_audio_introductions_shortcode() {
     $output = '<div class="audio-player-container">';
     $audio_index = 0;
 
-    // Função para renderizar áudio
+    // Função para renderizar áudio e legendas
     $renderAudioPlayer = function ($audio, $audio_index) {
         $html = '';
         $html .= '<div class="audio-player" id="audio-player-' . $audio_index . '" ' . ($audio_index > 0 ? 'style="display:none;"' : '') . '>';
         $html .= '<audio controls ' . ($audio_index === 0 ? 'autoplay' : '') . '>';
         $html .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $html .= '</audio>';
+
+        if (!empty($audio['subtitles'])) {
+            // Incluir o script de legendas JS diretamente
+            $html .= '<script>';
+            $html .= $audio['subtitles'];
+            $html .= '</script>';
+        }
+
         $html .= '</div>';
         return $html;
     };
@@ -142,35 +150,18 @@ function custom_audio_introductions_shortcode() {
     // Renderiza os áudios de introdução
     foreach ($introductions as $key => $audio) {
         $output .= $renderAudioPlayer($audio, $audio_index);
-
-        if (!empty($audio['subtitles'])) {
-            // Incluir o script de legendas JS diretamente
-            $output .= '<script>';
-            $output .= $audio['subtitles'];
-            $output .= '</script>';
-        }
-
         $audio_index++;
     }
 
     // Renderiza o áudio do número de destino específico
     if ($destiny_number !== null && isset($destiny_audios[$destiny_number])) {
-        $audio = $destiny_audios[$destiny_number];
-        $output .= $renderAudioPlayer($audio, $audio_index);
-
-        if (!empty($audio['subtitles'])) {
-            // Incluir o script de legendas JS diretamente
-            $output .= '<script>';
-            $output .= $audio['subtitles'];
-            $output .= '</script>';
-        }
-
+        $output .= $renderAudioPlayer($destiny_audios[$destiny_number], $audio_index);
         $audio_index++;
     }
 
     $output .= '</div>';
 
-    // Adiciona script para gerenciar a reprodução em sequência
+    // Adiciona script para gerenciar a reprodução em sequência e legendas
     $output .= '<script>
         document.addEventListener("DOMContentLoaded", function() {
             const players = document.querySelectorAll(".audio-player audio");
@@ -183,6 +174,30 @@ function custom_audio_introductions_shortcode() {
                     }
                 });
             }
+
+            // Função para processar legendas
+            function processSubtitles(subtitles) {
+                eval(subtitles); // Avalia a string JavaScript para definir a constante subtitles
+                const subtitleContainer = document.getElementById("subtitle-container");
+
+                players.forEach(function(player) {
+                    player.addEventListener("timeupdate", function() {
+                        const currentTime = player.currentTime;
+
+                        // Encontrar a legenda atual
+                        for (let i = 0; i < subtitles.length; i++) {
+                            if (currentTime >= subtitles[i].time && (i === subtitles.length - 1 || currentTime < subtitles[i + 1].time)) {
+                                // Exibir a legenda atual
+                                subtitleContainer.textContent = subtitles[i].text;
+                                break;
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Chamada para processar legendas
+            processSubtitles(' . json_encode($audio['subtitles']) . '); // Passa as legendas como JSON
         });
     </script>';
 
