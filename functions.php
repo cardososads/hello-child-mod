@@ -152,7 +152,7 @@ function custom_audio_introductions_shortcode() {
             $output .= '    const subtitleContainer = document.createElement("div");';
             $output .= '    subtitleContainer.classList.add("subtitle-container");';
             $output .= '    document.getElementById("audio-player-' . $audio_index . '").appendChild(subtitleContainer);';
-            $output .= '    const subtitles = ' . json_encode($audio['subtitles']) . ';';
+            $output .=      json_encode($audio['subtitles']);
             $output .= '    subtitles.forEach(subtitle => {';
             $output .= '        setTimeout(() => {';
             $output .= '            const subtitleElement = document.createElement("p");';
