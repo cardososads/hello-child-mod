@@ -182,6 +182,7 @@ function custom_audio_introductions_shortcode() {
             for (let i = 0; i < players.length; i++) {
                 players[i].addEventListener("ended", function() {
                     if (i + 1 < players.length) {
+                        document.getElementById("audio-player-" + i).style.display = "none";
                         document.getElementById("audio-player-" + (i + 1)).style.display = "block";
                         players[i + 1].play();
                     }
