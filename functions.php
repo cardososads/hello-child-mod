@@ -124,10 +124,7 @@ function custom_audio_introductions_shortcode() {
     // Obtém os áudios introdutórios e do número de destino
     $introductions = $audio_manager->getIntroductions();
     $destiny_audios = $audio_manager->getDestinyAudios($destiny_number);
-    var_dump($destiny_number);
-    echo '<pre>';
-    var_dump($destiny_audios[$destiny_number]);
-    echo '</pre>';
+
     // Renderiza os áudios e legendas
     $output = '';
 
@@ -149,8 +146,9 @@ function custom_audio_introductions_shortcode() {
         }
     }
 
-    // Renderiza os áudios do número de destino
-    foreach ($destiny_audios as $key => $audio) {
+    // Renderiza o áudio do número de destino específico
+    if ($destiny_number !== null && isset($destiny_audios[$destiny_number])) {
+        $audio = $destiny_audios[$destiny_number];
         $output .= '<audio controls>';
         $output .= '<source src="' . $audio['src'] . '" type="audio/mpeg">';
         $output .= '</audio>';
